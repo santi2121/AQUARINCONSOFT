@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Tratamiento de Datos Personales · AquaRincón</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: #0a2540;
+      color: #f8fbff;
+      font-family: 'DM Sans', sans-serif;
+      line-height: 1.7;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 2.5rem 1rem;
+    }
+
+    .page-card {
+      width: min(1000px, 100%);
+      background:
+        radial-gradient(ellipse at 20% 10%, rgba(0,200,150,0.08), transparent 50%),
+        radial-gradient(ellipse at 80% 90%, rgba(126,206,244,0.08), transparent 50%),
+        #0d2f50;
+      border-radius: 24px;
+      border: 1px solid rgba(126,206,244,0.12);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(126,206,244,0.06);
+      padding: 3rem 3.5rem;
+      position: relative;
+      overflow-y: auto;
+      max-height: calc(100vh - 5rem);
+    }
+
+    .page-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 180px; height: 180px;
+      background: radial-gradient(circle, rgba(126,206,244,0.08), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .brand {
+      font-family: 'Playfair Display', serif;
+      font-size: 0.85rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, #7ecef4, #00c896);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      margin-bottom: 1.8rem;
+      letter-spacing: 0.02em;
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 900;
+      color: #f8fbff;
+      margin-bottom: 0.4rem;
+    }
+
+    .fecha {
+      font-size: 0.82rem;
+      color: rgba(248,251,255,0.5);
+      margin-bottom: 2.2rem;
+      font-style: italic;
+    }
+
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #7ecef4;
+      margin-top: 2rem;
+      margin-bottom: 0.6rem;
+    }
+
+    p {
+      font-size: 0.92rem;
+      color: rgba(248,251,255,0.8);
+      text-align: justify;
+      margin-bottom: 0.8rem;
+    }
+
+    ul {
+      margin-left: 1.4rem;
+      margin-bottom: 0.8rem;
+    }
+
+    ul li {
+      font-size: 0.92rem;
+      color: rgba(248,251,255,0.75);
+      margin-bottom: 0.3rem;
+      padding-left: 0.4rem;
+    }
+
+    ul li::marker {
+      color: #00c896;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(126,206,244,0.15), transparent);
+      margin: 1.8rem 0;
+    }
+
+    .accept-bar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+      margin: 1.5rem 0 0.8rem;
+    }
+
+    .btn-accept {
+      padding: 0.9rem 2.4rem;
+      border: none;
+      background: linear-gradient(135deg, #1a8fd1, #00c896);
+      color: #0a2540;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 100px;
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: transform 0.25s, box-shadow 0.25s;
+      box-shadow: 0 4px 20px rgba(0,200,150,0.3);
+    }
+
+    .btn-accept:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,200,150,0.45);
+    }
+
+    .btn-cancel {
+      font-size: 0.82rem;
+      color: rgba(248,251,255,0.5);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .btn-cancel:hover {
+      color: #7ecef4;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 0.75rem;
+      color: rgba(248,251,255,0.3);
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-card">
+
+  <div class="brand">💧 AquaRincón</div>
+  <h1>Política de Tratamiento de Datos Personales</h1>
+
+  <p class="fecha">Fecha de actualización: Junio de 2026</p>
+
+  <h2>1. Responsable del Tratamiento de la Información</h2>
+  <p>La Empresa Administradora del Acueducto (en adelante "La Entidad"), comprometida con la protección de los datos personales de sus usuarios, adopta la presente Política de Tratamiento de Datos Personales de conformidad con lo establecido en la Ley 1581 de 2012, el Decreto 1377 de 2013 y demás normas que regulan la protección de datos personales en Colombia.</p>
+
+  <h2>2. Finalidad del Tratamiento de los Datos</h2>
+  <p>Los datos personales recolectados serán utilizados para las siguientes finalidades:</p>
+  <ul>
+    <li>Registrar y administrar usuarios del sistema.</li>
+    <li>Gestionar procesos de facturación y recaudo.</li>
+    <li>Registrar pagos y consultas de servicios.</li>
+    <li>Generar reportes administrativos y estadísticos.</li>
+    <li>Enviar notificaciones relacionadas con el servicio prestado.</li>
+    <li>Atender solicitudes, peticiones, quejas o reclamos.</li>
+    <li>Cumplir obligaciones legales y regulatorias.</li>
+  </ul>
+
+  <h2>3. Datos Recolectados</h2>
+  <p>La Entidad podrá recolectar información personal como:</p>
+  <ul>
+    <li>Nombres y apellidos.</li>
+    <li>Número de identificación.</li>
+    <li>Dirección de residencia.</li>
+    <li>Número de teléfono.</li>
+    <li>Correo electrónico.</li>
+    <li>Información relacionada con la prestación del servicio.</li>
+  </ul>
+
+  <h2>4. Derechos del Titular</h2>
+  <p>El titular de los datos personales tiene derecho a:</p>
+  <ul>
+    <li>Conocer, actualizar y rectificar sus datos personales.</li>
+    <li>Solicitar prueba de la autorización otorgada.</li>
+    <li>Ser informado sobre el uso dado a sus datos.</li>
+    <li>Presentar consultas o reclamos relacionados con sus datos.</li>
+    <li>Revocar la autorización otorgada cuando sea procedente.</li>
+    <li>Solicitar la supresión de sus datos cuando la ley lo permita.</li>
+  </ul>
+
+  <h2>5. Seguridad de la Información</h2>
+  <p>La Entidad implementará medidas técnicas, administrativas y organizacionales razonables para proteger los datos personales contra pérdida, acceso no autorizado, alteración, divulgación o uso indebido.</p>
+
+  <h2>6. Transferencia y Transmisión de Datos</h2>
+  <p>La información personal no será vendida, cedida o compartida con terceros sin autorización del titular, salvo en los casos previstos por la ley o requeridos por autoridad competente.</p>
+
+  <h2>7. Vigencia de la Información</h2>
+  <p>Los datos personales permanecerán almacenados durante el tiempo necesario para cumplir las finalidades descritas en esta política y las obligaciones legales correspondientes.</p>
+
+  <h2>8. Autorización del Titular</h2>
+  <p>Al registrarse en el sistema y aceptar esta política, el titular autoriza de manera previa, expresa e informada el tratamiento de sus datos personales para las finalidades aquí descritas.</p>
+
+  <h2>9. Contacto</h2>
+  <p>Para consultas, solicitudes o reclamos relacionados con el tratamiento de datos personales, puede comunicarse con la administración de la entidad a través de los canales oficiales de atención.</p>
+
+  <hr>
+
+  <div class="accept-bar">
+    <button class="btn-accept" onclick="aceptarYCerrar()">✓ Acepto la Política de Tratamiento de Datos</button>
+    <a href="javascript:void(0)" onclick="volverSinAceptar()" class="btn-cancel">← Volver sin aceptar</a>
+  </div>
+
+  <p class="footer-note">AquaRincón — Acueducto Vereda Rincón Santo</p>
+
+</div>
+
+<script>
+function aceptarYCerrar() {
+  if (window.opener && !window.opener.closed) {
+    var cb = window.opener.document.getElementById('reg-consent');
+    if (cb) {
+      cb.checked = true;
+      var evt = new Event('change', { bubbles: true });
+      cb.dispatchEvent(evt);
+    }
+    window.opener.focus();
+    window.close();
+  } else {
+    window.location.href = '/login';
+  }
+}
+
+function volverSinAceptar() {
+  if (window.opener && !window.opener.closed) {
+    window.opener.focus();
+    window.close();
+  } else {
+    window.location.href = '/login';
+  }
+}
+</script>
+
+</body>
+</html>

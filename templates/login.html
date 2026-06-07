@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaRincón · Acceso</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+</head>
+<body>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-stack">
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
+
+<div class="container {{ 'right-panel-active' if show_register is defined and show_register else '' }}" id="container">
+
+  <!-- ── REGISTRO ── -->
+  <div class="form-container sign-up-container">
+    <form action="/register" method="POST">
+      <div class="form-logo">💧 AquaRincón</div>
+      <h1>Crear cuenta</h1>
+      <p class="form-sub">Regístrate para acceder al sistema</p>
+      <label class="field-label">Nombres</label>
+      <input type="text" name="nombres" placeholder="Nombres" value="{{ register_data.nombres if register_data is defined and register_data.nombres else '' }}" required/>
+      <label class="field-label">Apellidos</label>
+      <input type="text" name="apellidos" placeholder="Apellidos" value="{{ register_data.apellidos if register_data is defined and register_data.apellidos else '' }}" required/>
+      <label class="field-label">Teléfono</label>
+      <input type="tel" name="telefono" placeholder="+57 300 000 0000" value="{{ register_data.telefono if register_data is defined and register_data.telefono else '' }}" />
+      <label class="field-label">Correo electrónico</label>
+      <input type="email" name="email" value="{{ register_data.email if register_data is defined and register_data.email else (email or '') }}" placeholder="usuario@correo.com" required/>
+      <label class="field-label">Contraseña</label>
+      <div class="password-field">
+        <input type="password" name="password" id="reg-password" placeholder="••••••••" required/>
+        <button type="button" class="toggle-pw" tabindex="-1" aria-label="Mostrar contraseña">
+          <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg class="eye-off-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+        </button>
+      </div>
+      <div class="password-reqs small" id="reg-password-reqs" style="margin-top:0.4rem;">
+        <div data-req="length" style="color:rgba(248,251,255,0.5);font-size:0.72rem;line-height:1.5;">● Mínimo 10 caracteres</div>
+        <div data-req="upper" style="color:rgba(248,251,255,0.5);font-size:0.72rem;line-height:1.5;">● Una mayúscula</div>
+        <div data-req="lower" style="color:rgba(248,251,255,0.5);font-size:0.72rem;line-height:1.5;">● Una minúscula</div>
+        <div data-req="digit" style="color:rgba(248,251,255,0.5);font-size:0.72rem;line-height:1.5;">● Un número</div>
+        <div data-req="symbol" style="color:rgba(248,251,255,0.5);font-size:0.72rem;line-height:1.5;">● Un símbolo</div>
+      </div>
+      <label class="field-label">Confirmar contraseña</label>
+      <div class="password-field">
+        <input type="password" name="confirm_password" id="reg-confirm-password" placeholder="••••••••" required/>
+        <button type="button" class="toggle-pw" tabindex="-1" aria-label="Mostrar contraseña">
+          <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg class="eye-off-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+        </button>
+      </div>
+      <div id="reg-password-match" style="color:rgba(248,251,255,0.5);font-size:0.72rem;line-height:1.5;margin-top:0.2rem;">● Las contraseñas deben coincidir</div>
+      <div class="consent-field">
+        <label class="consent-label">
+          <input type="checkbox" name="data_consent" id="reg-consent" value="1" required>
+          <span>He leído y acepto la Política de Tratamiento de Datos Personales y autorizo el uso de mi información de acuerdo con la Ley 1581 de 2012.</span>
+        </label>
+      </div>
+      <button type="submit" id="reg-submit" disabled>Crear cuenta</button>
+    </form>
+  </div>
+
+  <!-- ── LOGIN ── -->
+  <div class="form-container sign-in-container">
+    <form action="{{ url_for('login', next=next_target) if next_target else url_for('login') }}" method="POST">
+      <div class="form-logo">💧 AquaRincón</div>
+      <h1>Bienvenido</h1>
+      <p class="form-sub">Ingresa tus datos para continuar</p>
+      <label class="field-label">Correo electrónico</label>
+      <input type="hidden" name="next" value="{{ next_target or '' }}">
+      <input type="email" name="email" placeholder="usuario@correo.com" required/>
+      <label class="field-label">Contraseña</label>
+      <div class="password-field">
+        <input type="password" name="password" placeholder="••••••••" required/>
+        <button type="button" class="toggle-pw" tabindex="-1" aria-label="Mostrar contraseña">
+          <svg class="eye-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg class="eye-off-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>
+          </svg>
+        </button>
+      </div>
+      <a href="{{ url_for('forgot_password') }}" class="forgot">Olvidaste tu contrasena?</a>
+      <button type="submit">Ingresar al sistema</button>
+    </form>
+  </div>
+
+  <!-- ── OVERLAY ── -->
+  <div class="overlay-container">
+    <div class="overlay">
+
+      <div class="overlay-panel overlay-left">
+        <div class="overlay-drop"></div>
+        <h1>¡Bienvenido<br/>de vuelta!</h1>
+        <p>Ingresa con tu cuenta para gestionar el servicio de agua de Rincón Santo.</p>
+        <button class="ghost" id="signIn">Iniciar sesión</button>
+      </div>
+
+      <div class="overlay-panel overlay-right">
+        <div class="overlay-drop"></div>
+        <h1>Hola,<br/>Querido Usuario</h1>
+        <p>Crea tu cuenta y accede a todos los servicios del Acueducto Vereda Rincón Santo.</p>
+        <button class="ghost" id="signUp">Registrarse</button>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+ <a href="{{ url_for('index') }}" class="btn-home">← Volver al inicio</a>
+
+<script src="{{ url_for('static', filename='js/login.js') }}"></script>
+</body>
+</html>

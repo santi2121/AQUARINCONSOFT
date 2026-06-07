@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Acueducto Rincón Santo — Sistema de Gestión</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+
+  <!-- ====== PAGE LOADER ====== -->
+  <div id="pageLoader">
+    <div class="loader-bg"></div>
+    <div class="loader-content">
+      <div class="loader-drop-wrap">
+        <div class="loader-ripple r1"></div>
+        <div class="loader-ripple r2"></div>
+        <div class="loader-ripple r3"></div>
+        <div class="loader-drop">
+          <div class="loader-drop-shine"></div>
+        </div>
+      </div>
+      <div class="loader-logo">Acueducto Rincón Santo</div>
+      <div class="loader-text">Cargando sistema </div>
+      <div class="loader-bar-wrap">
+        <div class="loader-bar-track">
+          <div class="loader-bar-fill" id="loaderBarFill"></div>
+        </div>
+        <span class="loader-percent" id="loaderPercent">0%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANVAS WATER -->
+  <canvas id="waterCanvas"></canvas>
+
+  <!-- FLOATING DROPS -->
+  <div class="drop-container" id="dropContainer"></div>
+
+  <!-- ====== NAVBAR ====== -->
+  <nav id="navbar">
+    <div class="nav-logo">
+      <img src="{{ url_for('static', filename='imagenes/LOGO.png') }}" alt="Logo Acueducto Rincón Santo" style="height:120px;width:auto;vertical-align:middle;">
+    </div>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#inicio" class="active">Inicio</a></li>
+      <li><a href="#modulos">Módulos</a></li>
+      <li><a href="#noticias">Noticias</a></li>
+      <li><a href="#puntos-pago">Puntos de pago</a></li>
+      <li><a href="#contacto">Contacto</a></li>
+    </ul>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <!-- Theme toggle -->
+      <button class="theme-toggle" id="themeToggle" aria-label="Cambiar modo claro/oscuro">
+        <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+        <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+      <!-- ✅ Redirige a login.html -->
+      <button class="nav-btn" id="btnLogin" onclick="window.location.href='/login'">
+        Iniciar Sesión
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ====== HERO ====== -->
+  <section id="inicio">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        Vereda Rincón Santo · Guamo, Tolima
+      </div>
+      <h1 class="hero-title">
+        Estamos a tu servicio.<br/>
+      </h1>
+      <p class="hero-sub">
+        Plataforma integral para la automatización de facturación y gestión de usuarios del acueducto comunitario de la vereda Rincón Santo.
+      </p>
+      <div class="hero-ctas">
+        <button class="btn-primary" onclick="document.getElementById('modulos').scrollIntoView({behavior:'smooth'})">
+          Explorar módulos
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+        <!-- ✅ Redirige a login.html -->
+        <a href="{{ url_for('consultar_facturas_publicas') }}" class="btn-secondary">
+          Consultar factura
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="water-orb">
+        <div class="orb-ring ring1"></div>
+        <div class="orb-ring ring2"></div>
+        <div class="orb-ring ring3"></div>
+        <div class="orb-core">
+          <img src="{{ url_for('static', filename='imagenes/tanque.jpeg') }}" class="orb-img" alt="Tanque acueducto" onerror="this.style.display='none'">
+        </div>
+      </div>
+    </div>
+
+    <div class="scroll-hint">
+      <div class="scroll-line"></div>
+      <span>Desplázate</span>
+    </div>
+  </section>
+
+  <!-- ====== MÓDULOS ====== -->
+  <section class="modules-section" id="modulos">
+    <div class="section-header reveal">
+      <p class="section-tag">Sistema Integral</p>
+      <h2 class="section-title">6 Módulos de <em>gestión</em></h2>
+      <p class="section-desc">Cada módulo automatiza un proceso clave del acueducto, conectados en una sola plataforma segura y accesible.</p>
+    </div>
+
+    <div class="modules-grid">
+
+      <!-- Módulo 01 — Paga Aquí -->
+      <div class="module-card reveal" data-delay="0" data-color="#0288D1" data-next="pago">
+        <a class="module-card-link" href="{{ url_for('login', next='pago') }}" aria-label="Acceder a Paga Aqui"></a>
+        <div class="module-num">01</div>
+        <div class="module-icon">
+          <svg viewBox="0 0 48 48" fill="none">
+            <rect x="6" y="12" width="36" height="26" rx="3" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M6 20h36" stroke="currentColor" stroke-width="2.5"/>
+            <rect x="12" y="27" width="10" height="5" rx="1" stroke="currentColor" stroke-width="2"/>
+            <path d="M30 29h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="module-title">Paga Aquí</h3>
+        <p class="module-desc">Realiza el pago de tu factura de agua de forma rápida y segura directamente desde la plataforma, sin filas ni desplazamientos.</p>
+        <div class="module-tags"><span>Pago en línea</span><span>Seguro</span><span>Recibo digital</span></div>
+        <!-- ✅ Requiere login -->
+        <button class="module-btn" type="button">
+          Acceder <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Módulo 02 — Todo sobre mi factura -->
+      <div class="module-card reveal" data-delay="100" data-color="#00897B" data-next="factura">
+        <a class="module-card-link" href="{{ url_for('login', next='factura') }}" aria-label="Acceder a Todo sobre mi factura"></a>
+        <div class="module-num">02</div>
+        <div class="module-icon">
+          <svg viewBox="0 0 48 48" fill="none">
+            <rect x="10" y="6" width="28" height="36" rx="3" stroke="currentColor" stroke-width="2.5"/>
+            <line x1="16" y1="16" x2="32" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="16" y1="22" x2="32" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="16" y1="28" x2="24" y2="28" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="32" cy="34" r="5" stroke="currentColor" stroke-width="2"/>
+            <path d="M32 32v2.5l1.5 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="module-title">Todo sobre mi factura</h3>
+        <p class="module-desc">Consulta el detalle completo de tus facturas: historial, valores, fechas de vencimiento y descarga de comprobantes.</p>
+        <div class="module-tags"><span>Historial</span><span>Detalle de cobro</span><span>Descarga</span></div>
+        <!-- ✅ Requiere login -->
+        <button class="module-btn" type="button">
+          Acceder <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Módulo 03 — Acuerdos de Pago -->
+      <div class="module-card reveal" data-delay="200" data-color="#7B1FA2" data-next="acuerdos">
+        <a class="module-card-link" href="{{ url_for('login', next='acuerdos') }}" aria-label="Acceder a Acuerdos de Pago"></a>
+        <div class="module-num">03</div>
+        <div class="module-icon">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M14 24h20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M24 10v8M24 30v8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" opacity="0.5"/>
+            <path d="M10 18l4 4-4 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M38 18l-4 4 4 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="6" y="8" width="36" height="32" rx="3" stroke="currentColor" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <h3 class="module-title">Acuerdos de Pago</h3>
+        <p class="module-desc">Solicita y gestiona acuerdos de pago para deudas pendientes, con cuotas flexibles y seguimiento del cumplimiento.</p>
+        <div class="module-tags"><span>Cuotas</span><span>Deuda pendiente</span><span>Seguimiento</span></div>
+        <!-- ✅ Requiere login -->
+        <button class="module-btn" type="button">
+          Acceder <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Módulo 04 — Programación de cortes -->
+      <div class="module-card reveal" data-delay="300" data-color="#E64A19" data-next="cortes">
+        <a class="module-card-link" href="{{ url_for('login', next='cortes') }}" aria-label="Acceder a Programacion de cortes"></a>
+        <div class="module-num">04</div>
+        <div class="module-icon">
+          <svg viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="14" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M24 16v8l5 3" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 10l4 4M36 10l-4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+          </svg>
+        </div>
+        <h3 class="module-title">Programación de cortes</h3>
+        <p class="module-desc">Consulta el calendario de cortes programados por mora y solicita reconexión del servicio una vez regularizada la deuda.</p>
+        <div class="module-tags"><span>Calendario</span><span>Reconexión</span><span>Alertas</span></div>
+        <!-- ✅ Requiere login -->
+        <button class="module-btn" type="button">
+          Acceder <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Módulo 05 — Puntos de pago -->
+      <div class="module-card reveal" data-delay="400" data-color="#2E7D32" data-next="puntos-pago">
+        <a class="module-card-link" href="{{ url_for('login', next='puntos-pago') }}" aria-label="Acceder a Puntos de pago"></a>
+        <div class="module-num">05</div>
+        <div class="module-icon">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M24 6C17.373 6 12 11.373 12 18C12 27 24 42 24 42C24 42 36 27 36 18C36 11.373 30.627 6 24 6Z" stroke="currentColor" stroke-width="2.5"/>
+            <circle cx="24" cy="18" r="5" stroke="currentColor" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <h3 class="module-title">Puntos de pago</h3>
+        <p class="module-desc">Encuentra los puntos de pago habilitados más cercanos para cancelar tu factura de forma presencial en el municipio.</p>
+        <div class="module-tags"><span>Ubicaciones</span><span>Presencial</span><span>Horarios</span></div>
+        <!-- ✅ Requiere login -->
+        <button class="module-btn" type="button">
+          Acceder <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <!-- Módulo 06 — PQRS -->
+      <div class="module-card reveal" data-delay="500" data-color="#F9A825" data-next="pqrs">
+        <a class="module-card-link" href="{{ url_for('login', next='pqrs') }}" aria-label="Acceder a PQRS"></a>
+        <div class="module-num">06</div>
+        <div class="module-icon">
+          <svg viewBox="0 0 48 48" fill="none">
+            <path d="M8 12h32v24a4 4 0 0 1-4 4H12a4 4 0 0 1-4-4V12Z" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M4 12h40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="18" cy="28" r="4" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M26 24h8M26 28h6M26 32h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3 class="module-title">PQRS</h3>
+        <p class="module-desc">Radica peticiones, quejas, reclamos y sugerencias. Haz seguimiento en línea al estado de tu solicitud y tiempos de respuesta.</p>
+        <div class="module-tags"><span>Peticiones</span><span>Quejas</span><span>Seguimiento</span></div>
+        <!-- ✅ Requiere login -->
+        <button class="module-btn" type="button">
+          Acceder <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- ====== NOTICIAS ====== -->
+  <section class="news-section" id="noticias">
+    <div class="section-header reveal">
+      <p class="section-tag">Actualidad</p>
+      <h2 class="section-title">Últimas <em>noticias</em></h2>
+    </div>
+
+    <div class="news-grid">
+      {% for noticia in noticias %}
+        <article class="news-card {{ 'featured' if loop.first else '' }} reveal">
+          {% if noticia.imagen %}
+            <div class="news-img-wrap">
+              <img src="{{ url_for('static', filename=noticia.imagen) }}" class="news-img-real" alt="{{ noticia.titulo }}">
+              {% if loop.first %}<span class="news-badge">Destacado</span>{% endif %}
+            </div>
+          {% endif %}
+          <div class="news-body">
+            <span class="news-date">{{ noticia.fecha_publicacion.strftime('%d/%m/%Y') if noticia.fecha_publicacion else '' }}</span>
+            <h3>{{ noticia.titulo }}</h3>
+            <p>{{ noticia.resumen }}</p>
+          </div>
+        </article>
+      {% endfor %}
+      <article class="news-card featured reveal">
+        <div class="news-img-wrap">
+          <div class="news-img-placeholder img1"></div>
+          <span class="news-badge">Destacado</span>
+        </div>
+        <div class="news-body">
+          <span class="news-date">Mayo 2026</span>
+          <h3>Sistema digital entra en fase de pruebas piloto en la vereda Rincón Santo</h3>
+          <p>El nuevo sistema automatizado de facturación comenzó su etapa de validación con usuarios seleccionados de la comunidad...</p>
+          <a href="#" class="news-link">Leer más <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </article>
+
+      <article class="news-card reveal">
+        <div class="news-body">
+          <span class="news-date">Julio 2026</span>
+          <h3>Capacitación a la Junta Administradora en el uso del nuevo sistema</h3>
+          <p>Se realizaron talleres de formación con el personal administrativo del acueducto...</p>
+          <a href="#" class="news-link">Leer más <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </article>
+
+      <article class="news-card reveal">
+        <div class="news-body">
+          <span class="news-date">Agosto 2026</span>
+          <h3>Modernización del acueducto: un modelo para comunidades rurales del Tolima</h3>
+          <p>El proyecto es reconocido como referente de innovación social en municipios del Guamo...</p>
+          <a href="#" class="news-link">Leer más <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ====== PUNTOS DE PAGO ====== -->
+  <section class="payment-points-section" id="puntos-pago">
+    <div class="section-header reveal">
+      <p class="section-tag">Atencion presencial</p>
+      <h2 class="section-title">Puntos de <em>pago</em></h2>
+    </div>
+    <div class="points-grid">
+      {% for punto in puntos_pago %}
+        <article class="point-card reveal">
+          {% if punto.imagen %}
+            <img src="{{ url_for('static', filename=punto.imagen) }}" alt="{{ punto.nombre }}">
+          {% else %}
+            <div class="point-icon">AquaRincon</div>
+          {% endif %}
+          <div class="point-body">
+            <h3>{{ punto.nombre }}</h3>
+            <p>{{ punto.direccion }}</p>
+            <span>{{ punto.telefono or 'Telefono no registrado' }}</span>
+            <strong>{{ punto.horario }}</strong>
+            {% if punto.ruta_url %}
+              <a class="point-route" target="_blank" rel="noopener" href="{{ punto.ruta_url }}">Abrir ruta</a>
+            {% endif %}
+          </div>
+        </article>
+      {% else %}
+        <article class="point-card reveal">
+          <div class="point-icon">AquaRincon</div>
+          <div class="point-body">
+            <h3>Oficina del acueducto</h3>
+            <p>Vereda Rincon Santo, Guamo, Tolima</p>
+            <span>Atencion administrativa</span>
+            <strong>Lunes a Viernes - 8:00 AM a 5:00 PM</strong>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  </section>
+
+  <!-- ====== ACCESO RÁPIDO ====== -->
+  <div class="quick-access reveal">
+    <div class="qa-inner">
+      <div class="qa-text">
+        <h2>¿Eres usuario del acueducto?</h2>
+        <p>Consulta tu factura, realiza pagos en línea y envía solicitudes sin salir de casa.</p>
+      </div>
+      <div class="qa-btns">
+        <!-- ✅ Requiere login -->
+        <a href="{{ url_for('consultar_facturas_publicas') }}" class="qa-btn primary">
+          Consultar factura
+        </a>
+        <!-- ✅ Redirige directo a login -->
+        <button class="qa-btn" onclick="window.location.href='/login'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Iniciar sesión
+        </button>
+        <!-- ✅ Requiere login -->
+        <button class="qa-btn" onclick="window.location.href='/login?next=pqrs'">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Radicar PQRS
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-divider"></div>
+
+  <!-- ====== CONTACTO ====== -->
+  <section class="contact-section" id="contacto">
+    <div class="contact-grid">
+      <div class="contact-info reveal">
+        <p class="section-tag">Contáctanos</p>
+        <h2 style="font-family:'Playfair Display',serif;font-size:2.5rem;font-weight:900;margin-bottom:1rem;">¿Necesitas ayuda?</h2>
+        <p class="contact-desc">El equipo administrativo del Acueducto Rincón Santo está disponible para atender tus inquietudes.</p>
+
+        <div class="contact-items">
+          <div class="contact-item">
+            <div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <div><strong>Ubicación</strong><span>Vereda Rincón Santo, Guamo, Tolima</span></div>
+          </div>
+          <div class="contact-item">
+            <div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.7a16 16 0 0 0 5.89 5.89l.91-.91a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+            <div><strong>Teléfono</strong><span>+57 (8) 234 5678</span></div>
+          </div>
+          <div class="contact-item">
+            <div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+            <div><strong>Correo</strong><span>info@acueductorinconsanto.com</span></div>
+          </div>
+          <div class="contact-item">
+            <div class="ci-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+            <div><strong>Horario de atención</strong><span>Lunes a Viernes · 8:00 AM – 5:00 PM</span></div>
+          </div>
+        </div>
+      </div>
+
+      <form class="contact-form reveal" method="POST" action="{{ url_for('contacto') }}">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre completo</label>
+            <input type="text" name="nombre" placeholder="Tu nombre" required />
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="tel" name="telefono" placeholder="+57 300 000 0000" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Correo electrónico</label>
+          <input type="email" name="correo" placeholder="correo@ejemplo.com" required />
+        </div>
+        <div class="form-group">
+          <label>Asunto</label>
+          <input type="text" name="asunto" placeholder="Asunto del mensaje" required />
+          <select class="legacy-hidden">
+            <option value="">Selecciona una opción</option>
+            <option>Consulta de factura</option>
+            <option>Acuerdo de pago</option>
+            <option>PQRS</option>
+            <option>Otro</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Mensaje</label>
+          <textarea rows="4" name="mensaje" placeholder="Describe tu solicitud..." required></textarea>
+        </div>
+        <button type="submit" class="form-submit">
+          Enviar solicitud
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </button>
+        <div class="form-success" id="formSuccess">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          ¡Mensaje enviado! Te contactaremos pronto.
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <!-- ====== FOOTER ====== -->
+  <footer>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <svg viewBox="0 0 40 40" fill="none">
+            <path d="M20 4C20 4 8 16 8 24C8 30.627 13.373 36 20 36C26.627 36 32 30.627 32 24C32 16 20 4 20 4Z" fill="url(#fGrad)"/>
+            <defs><linearGradient id="fGrad" x1="20" y1="4" x2="20" y2="36"><stop offset="0%" stop-color="#7ecef4"/><stop offset="100%" stop-color="#1a8fd1"/></linearGradient></defs>
+          </svg>
+          <div>
+            <strong>Acueducto Rincón Santo</strong>
+            <small>Guamo · Tolima · Colombia</small>
+          </div>
+        </div>
+        <p>Sistema automatizado de facturación y gestión de usuarios. Desarrollado por estudiantes de UNIESPINAL — Tecnología en Gestión Informática.</p>
+      </div>
+
+      <!-- ✅ Footer — Módulos: todos requieren login -->
+      <div class="footer-links-group">
+        <h4>Módulos</h4>
+        <ul>
+          <li><a href="login.html?next=facturacion">Facturación</a></li>
+          <li><a href="login.html?next=gestion-usuarios">Gestión de Usuarios</a></li>
+          <li><a href="login.html?next=registro-pagos">Registro de Pagos</a></li>
+          <li><a href="login.html?next=morosidad">Control de Morosidad</a></li>
+          <li><a href="login.html?next=pqrs">PQRS</a></li>
+          <li><a href="login.html?next=reportes">Reportes</a></li>
+        </ul>
+      </div>
+
+      <!-- ✅ Footer — Servicios: todos requieren login -->
+      <div class="footer-links-group">
+        <h4>Servicios</h4>
+        <ul>
+          <li><a href="/login?next=consultar-factura">Consultar factura</a></li>
+          <li><a href="/login?next=puntos-pago">Puntos de pago</a></li>
+          <li><a href="/login?next=solicitud-corte">Solicitud de corte</a></li>
+          <li><a href="/login?next=paz-y-salvo">Paz y salvo</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-links-group">
+        <h4>Institución</h4>
+        <ul>
+          <li><a href="#">UNIESPINAL</a></li>
+          <li><a href="#">Junta Administradora</a></li>
+          <li><a href="#">Normatividad</a></li>
+          <li><a href="#">Política de datos</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Acueducto Rincón Santo · Todos los derechos reservados</span>
+      <span>Desarrollado por Santiago Leal · Fernanda Diaz · UNIESPINAL</span>
+    </div>
+  </footer>
+
+       Se conserva en el DOM por si se necesita para otro propósito futuro. -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal" id="modal">
+      <button class="modal-close" id="modalClose">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="modal-header">
+        <div class="modal-drop">
+          <svg viewBox="0 0 60 60" fill="none">
+            <path d="M30 5C30 5 12 22 12 34C12 43.941 20.059 52 30 52C39.941 52 48 43.941 48 34C48 22 30 5 30 5Z" fill="url(#mGrad)"/>
+            <defs><linearGradient id="mGrad" x1="30" y1="5" x2="30" y2="52"><stop offset="0%" stop-color="#7ecef4"/><stop offset="100%" stop-color="#1a8fd1"/></linearGradient></defs>
+          </svg>
+        </div>
+        <h2>Bienvenido</h2>
+        <p>Ingresa con tu cuenta al sistema</p>
+      </div>
+      <div class="modal-tabs">
+        <button class="tab active" data-tab="usuario">Usuario</button>
+        <button class="tab" data-tab="admin">Administrador</button>
+      </div>
+      <form class="modal-form" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Código de usuario / Cédula</label>
+          <input type="text" placeholder="Ej. RS-0042 o 1234567890" required />
+        </div>
+        <div class="form-group">
+          <label>Contraseña</label>
+          <div class="input-pw">
+            <input type="password" id="pwInput" placeholder="••••••••" required />
+            <button type="button" class="pw-toggle" onclick="togglePw()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="form-options">
+          <label class="check-label"><input type="checkbox" /> Recordarme</label>
+          <a href="#">¿Olvidaste tu contraseña?</a>
+        </div>
+        <button type="submit" class="form-submit full">Ingresar al sistema</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/chat_widget.js') }}"></script>
+</body>
+</html>

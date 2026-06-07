@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaRincon - Pagar recibo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('dashboard_admin') if session.get('role') == 'admin' else url_for('dashboard_usuario') }}">
+      <img src="{{ url_for('static', filename='imagenes/LOGO.png') }}" alt="AquaRincon">
+      <span>AquaRincon</span>
+    </a>
+    <nav class="top-actions">
+      <span>{{ session.get('name', 'Usuario') }}</span>
+      <a href="{{ url_for('dashboard_admin') if session.get('role') == 'admin' else url_for('dashboard_usuario') }}" class="logout">Volver al panel</a>
+    </nav>
+  </header>
+
+  <main class="payment-layout">
+    <section class="panel-card payment-card">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="messages">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <div class="panel-heading">
+        <div>
+          <span>Reporte de pago</span>
+          <h1>Pagar recibo</h1>
+        </div>
+      </div>
+
+      <form class="inline-admin-form" method="POST" action="{{ url_for('pagar') }}">
+        <label>Codigo de recibo
+          <input type="text" name="codigo_recibo" value="{{ codigo }}" placeholder="Ej. RS-0001" required>
+        </label>
+        <button class="btn-primary-form" type="submit" name="action" value="consultar">Consultar deuda</button>
+      </form>
+
+      {% if user %}
+        {% set total_pendiente = (pending|length) * tarifa_mensual %}
+        <div class="payment-summary">
+          <article><span>Usuario</span><strong>{{ user.nombre_completo }}</strong><small>{{ user.direccion }}</small></article>
+          <article><span>Codigo</span><strong>{{ user.codigo_recibo }}</strong><small>{{ user.estado }}</small></article>
+          <article><span>Saldo</span><strong>{{ total_pendiente|money }}</strong><small>{{ pending|length }} mes(es) pendiente(s)</small></article>
+        </div>
+        {% if user.ubicacion_maps %}
+        <div style="margin-top:1rem;">
+          <iframe src="{{ user.ubicacion_maps }}" width="100%" height="250" style="border:0;border-radius:12px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+        {% endif %}
+
+        {% if pending %}
+          {% if pending|length > 5 and not permission %}
+            <div class="notice-box">
+              Debe mas de 5 meses. Solicita primero un acuerdo de pago con administracion para habilitar el reporte.
+            </div>
+          {% elif pending|length > 5 and permission %}
+            <div class="notice-box ok">
+              Acuerdo activo: puedes reportar el pago desde {{ permission.meses_minimos }} mes(es).
+            </div>
+          {% endif %}
+
+          <div class="users-table-wrap compact-table">
+            <table class="users-table">
+              <thead>
+                <tr><th>Factura</th><th>Periodo</th><th>Vencimiento</th><th>Valor</th><th>Estado</th><th>PDF</th></tr>
+              </thead>
+              <tbody>
+                {% for factura in pending %}
+                  <tr>
+                    <td>{{ factura.id_factura }}</td>
+                    <td>{{ factura.periodo }}</td>
+                    <td>{{ factura.fecha_vencimiento }}</td>
+                    <td>{{ factura.valor_total|money }}</td>
+                    <td><span class="status-pill {{ 'rejected' if factura.estado == 'vencida' else 'debt' }}">{{ factura.estado }}</span></td>
+                    <td><a class="table-link" href="{{ url_for('descargar_factura_pdf', invoice_id=factura.id_factura) }}">Descargar</a></td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          {% if pending|length <= 5 or permission %}
+            <form class="user-form pay-form" method="POST" action="{{ url_for('pagar') }}" enctype="multipart/form-data">
+              <input type="hidden" name="codigo_recibo" value="{{ user.codigo_recibo }}">
+              <label>Meses a pagar
+                <select name="meses" required>
+                  {% set minimo = permission.meses_minimos if pending|length > 5 and permission else 1 %}
+                  {% for mes in range(minimo, pending|length + 1) %}
+                    <option value="{{ mes }}">{{ mes }} mes(es) - {{ (mes * tarifa_mensual)|money }}</option>
+                  {% endfor %}
+                </select>
+              </label>
+              <label>Metodo de pago
+                <select name="metodo_pago" id="metodo_pago" required>
+                  <option value="fisico">Pago fisico</option>
+                  <option value="transferencia">Transferencia</option>
+                  <option value="consignacion">Consignacion</option>
+                  <option value="otro">Otro</option>
+                </select>
+              </label>
+              <label id="comprobante-label" style="display:none;">Comprobante de pago
+                <input type="file" name="comprobante" id="comprobante" accept="image/png,image/jpeg,image/webp,image/gif">
+                <small style="color:rgba(0,0,0,0.5);font-size:0.75rem;">Adjunta la foto del comprobante (PNG, JPG, WEBP, GIF)</small>
+                <small style="color:var(--gold);font-size:0.75rem;">* Obligatorio para transferencia o consignacion</small>
+              </label>
+              <label>Referencia
+                <input type="text" name="referencia" placeholder="Numero de comprobante o nota">
+              </label>
+              <label>Confirmar codigo
+                <input type="text" name="codigo_confirmacion" value="{{ user.codigo_recibo }}" placeholder="Repite el codigo de recibo" required>
+              </label>
+              <button class="btn-primary-form" type="submit" name="action" value="reportar">Enviar reporte de pago</button>
+            </form>
+            <script>
+              (function () {
+                var sel = document.getElementById('metodo_pago');
+                function toggleComprobante() {
+                  var label = document.getElementById('comprobante-label');
+                  var input = document.getElementById('comprobante');
+                  if (sel.value === 'transferencia' || sel.value === 'consignacion') {
+                    label.style.display = '';
+                    input.required = true;
+                  } else {
+                    label.style.display = 'none';
+                    input.required = false;
+                  }
+                }
+                sel.addEventListener('change', toggleComprobante);
+                toggleComprobante();
+              })();
+            </script>
+          {% endif %}
+        {% else %}
+          <div class="notice-box ok">Este codigo no tiene facturas pendientes.</div>
+        {% endif %}
+      {% else %}
+        <p class="panel-note">Ingresa el codigo del recibo para consultar las facturas pendientes y reportar el pago.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>

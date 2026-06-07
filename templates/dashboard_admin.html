@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaRincon - Panel Administrador</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='adminhmd/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='adminhmd/vendors/bootstrap-icons/bootstrap-icons.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='adminhmd/css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='adminhmd/css/aquarincon-admin.css') }}">
+  <style>
+    .password-field input { padding-right: 2.6rem; }
+    .toggle-pw { background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: inherit; padding: 0.3rem; }
+    .toggle-pw:hover { opacity: 0.7; }
+    .password-reqs div { font-size: 0.75rem; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="admin-shell">
+    <div class="sidebar-backdrop" data-sidebar-close></div>
+
+    <aside class="admin-sidebar" id="adminSidebar" aria-label="Navegacion principal">
+      <div class="sidebar-header">
+        <a class="brand-mark" href="{{ url_for('dashboard_admin') }}" aria-label="AquaRincon dashboard">
+          <img class="brand-logo-img" src="{{ url_for('static', filename='imagenes/LOGO.png') }}" alt="AquaRincon">
+          <span class="brand-copy">
+            <span class="brand-title">AquaRincon</span>
+            <span class="brand-subtitle">Panel administrador</span>
+          </span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link active" href="#resumen"><span class="nav-icon"><i class="bi bi-speedometer2"></i></span><span class="nav-text">Dashboard</span></a>
+        <a class="nav-link" href="#reportes"><span class="nav-icon"><i class="bi bi-graph-up-arrow"></i></span><span class="nav-text">Reportes</span></a>
+        <a class="nav-link" href="#auditoria"><span class="nav-icon"><i class="bi bi-shield-check"></i></span><span class="nav-text">Auditoria</span></a>
+        <a class="nav-link" href="#pagaron-mes"><span class="nav-icon"><i class="bi bi-cash-coin"></i></span><span class="nav-text">Pagaron mes</span></a>
+        <a class="nav-link" href="#morosos"><span class="nav-icon"><i class="bi bi-exclamation-triangle"></i></span><span class="nav-text">Morosos</span></a>
+        <a class="nav-link" href="#facturacion"><span class="nav-icon"><i class="bi bi-receipt"></i></span><span class="nav-text">Facturacion</span></a>
+        <a class="nav-link" href="#pago-facturas"><span class="nav-icon"><i class="bi bi-search"></i></span><span class="nav-text">Pago facturas</span></a>
+        <a class="nav-link" href="#pagos"><span class="nav-icon"><i class="bi bi-check2-square"></i></span><span class="nav-text">Verificar pagos</span></a>
+        <a class="nav-link" href="#sistema"><span class="nav-icon"><i class="bi bi-people"></i></span><span class="nav-text">Usuarios</span></a>
+        <a class="nav-link" href="#pqrs-admin"><span class="nav-icon"><i class="bi bi-chat-left-text"></i></span><span class="nav-text">PQRS</span></a>
+        <a class="nav-link" href="#puntos-pago"><span class="nav-icon"><i class="bi bi-geo-alt"></i></span><span class="nav-text">Puntos de pago</span></a>
+        <a class="nav-link" href="#noticias-admin"><span class="nav-icon"><i class="bi bi-newspaper"></i></span><span class="nav-text">Noticias</span></a>
+        <a class="nav-link" href="#mensajes"><span class="nav-icon"><i class="bi bi-envelope"></i></span><span class="nav-text">Mensajes</span></a>
+      </nav>
+
+      <div class="sidebar-user">
+        <img class="avatar-img avatar-md sidebar-user-avatar" src="{{ url_for('static', filename='imagenes/LOGO.png') }}" alt="{{ user_name }}">
+        <strong>{{ user_name }}</strong>
+        <small>{{ session.get('user_login') }}</small>
+      </div>
+
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>
+        <span class="sidebar-footer-text">Sistema activo</span>
+      </div>
+    </aside>
+
+    <div class="admin-main">
+      <nav class="navbar admin-navbar navbar-expand bg-white">
+        <div class="container-fluid px-3 px-lg-4">
+          <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-controls="adminSidebar" aria-expanded="true" aria-label="Abrir menu">
+            <span></span><span></span><span></span>
+          </button>
+
+          <form class="d-none d-md-flex ms-3 flex-grow-1" role="search">
+            <input class="form-control search-input" type="search" placeholder="Buscar clientes en la tabla" data-table-search="clientesTable" aria-label="Buscar clientes">
+          </form>
+
+          <div class="navbar-actions ms-auto">
+            <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Cambiar tema" title="Cambiar tema">
+              <i class="bi bi-moon-stars" data-theme-icon></i>
+            </button>
+            <div class="dropdown">
+              <button class="icon-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notificaciones">
+                {% if billing.pagos_pendientes or mensajes_contacto %}
+                  <span class="notification-dot"></span>
+                {% endif %}
+                <i class="bi bi-bell"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end notification-menu">
+                <div class="dropdown-header fw-bold text-body">Alertas</div>
+                <a class="dropdown-item" href="#pagos">
+                  <span class="notification-title">{{ billing.pagos_pendientes }} pagos por verificar</span>
+                  <span class="notification-time">Reportes de usuarios</span>
+                </a>
+                <a class="dropdown-item" href="#morosos">
+                  <span class="notification-title">{{ billing.morosos|length }} clientes morosos</span>
+                  <span class="notification-time">Cartera pendiente</span>
+                </a>
+                <a class="dropdown-item" href="#mensajes">
+                  <span class="notification-title">{{ mensajes_contacto|length }} mensajes recibidos</span>
+                  <span class="notification-time">Contactanos</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="dropdown" id="profileDropdown">
+              <button class="profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img class="avatar-img avatar-sm" src="{{ url_for('static', filename='imagenes/LOGO.png') }}" alt="{{ user_name }}">
+                <span class="profile-name d-none d-sm-inline">{{ user_name }}</span>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 380px;">
+                <div class="d-flex gap-2 mb-3">
+                  <button class="btn btn-sm btn-primary flex-fill" data-profile-tab="perfil">Mi Perfil</button>
+                  <button class="btn btn-sm btn-outline-secondary flex-fill" data-profile-tab="config">Configuracion</button>
+                </div>
+
+                {# ── MI PERFIL ── #}
+                <div data-profile-content="perfil">
+                  <div class="mb-3">
+                    <p class="fw-bold mb-0">{{ current_user_data.nombres }} {{ current_user_data.apellidos }}</p>
+                    <p class="text-muted small mb-0">{{ current_user_data.email }}</p>
+                    <p class="text-muted small mb-0">Documento: {{ current_user_data.cedula or 'No registrado' }}</p>
+                    <p class="text-muted small mb-0">Telefono: {{ current_user_data.telefono or 'No registrado' }}</p>
+                    <p class="text-muted small mb-0">Miembro desde: {{ current_user_data.fecha_creacion.strftime('%d/%m/%Y') if current_user_data.fecha_creacion else '' }}</p>
+                  </div>
+                  <form method="POST" action="{{ url_for('actualizar_perfil') }}">
+                    <label class="form-label small fw-bold mt-1">Nombres</label>
+                    <input class="form-control form-control-sm" type="text" name="nombres" value="{{ current_user_data.nombres }}" required>
+                    <label class="form-label small fw-bold mt-1">Apellidos</label>
+                    <input class="form-control form-control-sm" type="text" name="apellidos" value="{{ current_user_data.apellidos }}">
+                    <label class="form-label small fw-bold mt-1">Documento</label>
+                    <input class="form-control form-control-sm" type="text" name="cedula" value="{{ current_user_data.cedula or '' }}">
+                    <label class="form-label small fw-bold mt-1">Telefono</label>
+                    <input class="form-control form-control-sm" type="tel" name="telefono" value="{{ current_user_data.telefono or '' }}">
+                    <button class="btn btn-primary btn-sm mt-2 w-100" type="submit">Guardar cambios</button>
+                  </form>
+                </div>
+
+                {# ── CONFIGURACION ── #}
+                <div data-profile-content="config" style="display:none">
+                  <a class="btn btn-outline-primary btn-sm w-100 mb-3" href="{{ url_for('descargar_archivo_recuperacion') }}">Descargar archivo de recuperacion</a>
+                  <hr class="my-2">
+                  <h6 class="fw-bold small mb-2">Cambiar contrasena</h6>
+                  <form method="POST" action="{{ url_for('cambiar_contrasena') }}">
+                    <label class="form-label small fw-bold mt-1">Contrasena actual</label>
+                    <div class="password-field position-relative">
+                      <input class="form-control form-control-sm pe-5" type="password" name="current_password" required>
+                      <button type="button" class="toggle-pw btn p-1 position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent" tabindex="-1" aria-label="Mostrar contrasena">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="eye-off-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <label class="form-label small fw-bold mt-1">Nueva contrasena</label>
+                    <div class="password-field position-relative">
+                      <input class="form-control form-control-sm pe-5" type="password" name="new_password" id="new_password" required>
+                      <button type="button" class="toggle-pw btn p-1 position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent" tabindex="-1" aria-label="Mostrar contrasena">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="eye-off-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="password-reqs small mt-1" id="passwordReqs">
+                      <div data-req="length" class="text-muted">● Minimo 10 caracteres</div>
+                      <div data-req="upper" class="text-muted">● Una mayuscula</div>
+                      <div data-req="lower" class="text-muted">● Una minuscula</div>
+                      <div data-req="digit" class="text-muted">● Un numero</div>
+                      <div data-req="symbol" class="text-muted">● Un simbolo</div>
+                    </div>
+                    <label class="form-label small fw-bold mt-1">Confirmar nueva contrasena</label>
+                    <div class="password-field position-relative">
+                      <input class="form-control form-control-sm pe-5" type="password" name="confirm_password" required>
+                      <button type="button" class="toggle-pw btn p-1 position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent" tabindex="-1" aria-label="Mostrar contrasena">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="eye-off-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <button class="btn btn-primary btn-sm mt-2 w-100" type="submit">Actualizar contrasena</button>
+                  </form>
+                </div>
+
+                <hr class="my-2">
+                <div class="d-flex gap-2">
+                  <a class="btn btn-light btn-sm flex-fill" href="{{ url_for('index') }}">Volver al inicio</a>
+                  <a class="btn btn-outline-danger btn-sm" href="{{ url_for('logout') }}">Cerrar sesion</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main class="dashboard-content">
+        <div class="container-fluid px-3 px-lg-4 py-4">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <div class="admin-flashes mb-3">
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ 'danger' if category == 'danger' else category }} mb-0">{{ message }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
+
+          <div class="page-heading report-anchor" id="resumen">
+            <div class="page-heading-copy">
+              <span class="page-icon"><i class="bi bi-speedometer2"></i></span>
+              <div>
+                <p class="eyebrow mb-1">Administracion</p>
+                <h1 class="h3 mb-1">Panel de control</h1>
+                <p class="text-muted mb-0">Gestion de facturacion, pagos, cartera, usuarios y contenido del acueducto.</p>
+              </div>
+            </div>
+            <div class="heading-actions">
+              <a class="btn btn-outline-secondary btn-sm" href="#reportes"><i class="bi bi-graph-up-arrow"></i> Ver reportes</a>
+              <a class="btn btn-primary btn-sm" href="#facturacion"><i class="bi bi-file-earmark-plus"></i> Generar factura</a>
+            </div>
+          </div>
+
+          <section class="row g-3 mt-1" aria-label="Metricas del dashboard">
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-primary">
+                <div class="metric-top"><span class="metric-label">Pagaron este mes</span><span class="metric-icon"><i class="bi bi-cash-coin"></i></span></div>
+                <div class="metric-value">{{ billing.pagos_mes.personas or 0 }}</div>
+                <div class="metric-meta"><span class="text-success">{{ billing.pagos_mes.total|money }}</span><span>{{ billing.pagos_mes.facturas or 0 }} facturas</span></div>
+              </article>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-success">
+                <div class="metric-top"><span class="metric-label">Clientes</span><span class="metric-icon"><i class="bi bi-people"></i></span></div>
+                <div class="metric-value">{{ billing.total_clientes }}</div>
+                <div class="metric-meta"><span>{{ usuarios_sistema|length }}</span><span>usuarios web</span></div>
+              </article>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-warning">
+                <div class="metric-top"><span class="metric-label">Por cobrar</span><span class="metric-icon"><i class="bi bi-receipt-cutoff"></i></span></div>
+                <div class="metric-value">{{ billing.facturas_pendientes }}</div>
+                <div class="metric-meta"><span class="text-warning">{{ billing.total_pendiente|money }}</span><span>facturas pendientes</span></div>
+              </article>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-danger">
+                <div class="metric-top"><span class="metric-label">Morosos</span><span class="metric-icon"><i class="bi bi-exclamation-circle"></i></span></div>
+                <div class="metric-value">{{ billing.morosos|length }}</div>
+                <div class="metric-meta"><span class="text-danger">{{ billing.riesgo_corte|length }} riesgo</span><span>mas de 5 meses</span></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="row g-3 mt-1 report-anchor" id="reportes">
+            <div class="col-12 col-xl-8">
+              <div class="panel h-100">
+                <div class="panel-header">
+                  <div>
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-bar-chart-line"></i><span>Pagos por mes</span></h2>
+                    <p class="text-muted mb-0">Personas con facturas pagadas en los ultimos meses.</p>
+                  </div>
+                  <a class="btn btn-light btn-sm" href="#pagaron-mes">Detalle</a>
+                </div>
+                <div class="chart-bars" aria-label="Grafica de pagos por mes">
+                  {% for item in billing.pagos_chart %}
+                    <div class="chart-column" style="--bar-height: {{ item.height }}%;">
+                      <span title="{{ item.personas }} personas - {{ item.total_pagado|money }}"></span>
+                      <small>{{ item.etiqueta }}</small>
+                    </div>
+                  {% else %}
+                    <div class="text-muted">No hay pagos registrados todavia.</div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            <div class="col-12 col-xl-4">
+              <div class="panel h-100">
+                <div class="panel-header">
+                  <div>
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-activity"></i><span>Resumen operativo</span></h2>
+                    <p class="text-muted mb-0">Estado actual del recaudo.</p>
+                  </div>
+                </div>
+                <div class="report-summary-grid mb-3">
+                  <div class="mini-stat"><span>Facturas</span><strong>{{ billing.total_facturas }}</strong></div>
+                  <div class="mini-stat"><span>Reportes</span><strong>{{ billing.pagos_pendientes }}</strong></div>
+                  <div class="mini-stat"><span>Cartera</span><strong>{{ billing.morosos|length }}</strong></div>
+                </div>
+                <div class="activity-list compact">
+                  <div class="activity-item"><span class="activity-dot bg-success"></span><div><p class="mb-1 fw-semibold">{{ billing.pagos_mes.personas or 0 }} personas pagaron este mes</p><p class="text-muted small mb-0">Total verificado: {{ billing.pagos_mes.total|money }}.</p></div></div>
+                  <div class="activity-item"><span class="activity-dot bg-warning"></span><div><p class="mb-1 fw-semibold">{{ billing.pagos_pendientes }} pagos pendientes</p><p class="text-muted small mb-0">Requieren verificacion del administrador.</p></div></div>
+                  <div class="activity-item"><span class="activity-dot bg-danger"></span><div><p class="mb-1 fw-semibold">{{ billing.riesgo_corte|length }} casos criticos</p><p class="text-muted small mb-0">Clientes con mas de 5 meses pendientes.</p></div></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel mt-3 report-anchor" id="auditoria">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-shield-check"></i><span>Auditoria de usuarios</span></h2>
+                <p class="text-muted mb-0">Registro de actividad del sistema.</p>
+              </div>
+            </div>
+            <form class="row g-2 mb-3" method="GET" action="{{ url_for('dashboard_admin') }}">
+              <div class="col-auto">
+                <select class="form-select form-select-sm" name="audit_user" style="min-width:140px;">
+                  <option value="">Todos los usuarios</option>
+                  {% for usuario in usuarios_sistema %}
+                    <option value="{{ usuario.id }}" {{ 'selected' if activity_filters.user_id == usuario.id else '' }}>{{ usuario.nombres }} {{ usuario.apellidos }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-auto">
+                <select class="form-select form-select-sm" name="audit_event" style="min-width:140px;">
+                  <option value="">Todos los eventos</option>
+                  {% for key, label in activity_report.event_labels.items() %}
+                    <option value="{{ key }}" {{ 'selected' if activity_filters.event == key else '' }}>{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-auto">
+                <input class="form-control form-control-sm" type="date" name="audit_from" value="{{ activity_filters.date_from }}" style="min-width:130px;">
+              </div>
+              <div class="col-auto">
+                <input class="form-control form-control-sm" type="date" name="audit_to" value="{{ activity_filters.date_to }}" style="min-width:130px;">
+              </div>
+              <div class="col-auto d-flex gap-1">
+                <button class="btn btn-primary btn-sm" type="submit">Filtrar</button>
+                <a class="btn btn-light btn-sm" href="{{ url_for('dashboard_admin') }}#auditoria">Limpiar</a>
+              </div>
+            </form>
+            <div class="table-responsive">
+              <table class="table table-sm align-middle mb-0">
+                <thead><tr><th>Fecha</th><th>Nombre</th><th>Evento</th><th>Ruta</th><th>IP</th><th>Navegador</th><th>OS</th></tr></thead>
+                <tbody>
+                  {% for log in activity_report.events %}
+                    <tr>
+                      <td><small>{{ log.fecha_creacion }}</small></td>
+                      <td><strong>{{ log.usuario_nombre }}</strong><small class="text-muted d-block">{{ log.usuario_email }}</small></td>
+                      <td><span class="badge {{ 'text-bg-success' if log.exito else 'text-bg-danger' }}">{{ log.evento_label }}</span></td>
+                      <td><code class="small">{{ log.ruta }}</code></td>
+                      <td><small>{{ log.ip or '-' }}</small></td>
+                      <td><small>{{ log.browser }}</small></td>
+                      <td><small>{{ log.os }}</small></td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="7" class="empty-row">No hay registros de actividad.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel mt-3 report-anchor" id="pagaron-mes">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-person-check"></i><span>Personas que pagaron al mes</span></h2>
+                <p class="text-muted mb-0">Clientes con pago verificado durante el mes actual.</p>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead><tr><th>Cliente</th><th>Codigo</th><th>Facturas pagadas</th><th>Total pagado</th><th>Ultimo pago</th></tr></thead>
+                <tbody>
+                  {% for pago in billing.pagaron_mes %}
+                    <tr>
+                      <td><strong>{{ pago.nombre_completo }}</strong><small class="text-muted">{{ pago.direccion }}</small></td>
+                      <td>{{ pago.codigo_recibo }}</td>
+                      <td>{{ pago.facturas_pagadas }}</td>
+                      <td>{{ pago.total_pagado|money }}</td>
+                      <td>{{ pago.ultimo_pago }}</td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="5" class="empty-row">No hay personas con pagos verificados este mes.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel mt-3 report-anchor" id="morosos">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-exclamation-triangle"></i><span>Reporte de morosos</span></h2>
+                <p class="text-muted mb-0">Clientes con facturas pendientes o vencidas.</p>
+              </div>
+              <span class="badge text-bg-danger">{{ billing.morosos|length }} morosos</span>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead><tr><th>Cliente</th><th>Codigo</th><th>Meses debe</th><th>Total deuda</th><th>Acuerdo</th></tr></thead>
+                <tbody>
+                  {% for item in billing.morosos %}
+                    <tr>
+                      <td><strong>{{ item.nombre_completo }}</strong><small class="text-muted">{{ item.direccion }}</small></td>
+                      <td>{{ item.codigo_recibo }}</td>
+                      <td>{{ item.meses_debe }}</td>
+                      <td>{{ item.total_debe|money }}</td>
+                      <td class="table-actions">
+                        {% if item.meses_debe > 5 and not item.tiene_permiso %}
+                          <form method="POST" action="{{ url_for('admin_conceder_permiso_pago', user_id=item.id) }}">
+                            <input type="hidden" name="observacion" value="Permiso por deuda mayor a 5 meses">
+                            <button class="btn btn-sm btn-outline-warning" type="submit">Conceder permiso</button>
+                          </form>
+                        {% elif item.tiene_permiso %}
+                          <span class="status-soft paid">Permiso activo</span>
+                        {% else %}
+                          <span class="status-soft debt">En seguimiento</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="5" class="empty-row">No hay clientes morosos.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel mt-3 report-anchor" id="facturacion">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-receipt"></i><span>Facturacion mensual</span></h2>
+                <p class="text-muted mb-0">Genera una factura de {{ tarifa_mensual|money }} para cada cliente del acueducto.</p>
+              </div>
+            </div>
+            <form class="row g-3 align-items-end" method="POST" action="{{ url_for('admin_generar_facturacion') }}">
+              <div class="col-12 col-md-4">
+                <label class="form-label">Periodo</label>
+                <input class="form-control" type="month" name="periodo">
+              </div>
+              <div class="col-12 col-md-4">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-file-earmark-plus"></i> Generar facturacion</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="panel mt-3 report-anchor" id="pago-facturas">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-search"></i><span>Pago directo de facturas</span></h2>
+                <p class="text-muted mb-0">Busca por numero de factura o codigo del usuario.</p>
+              </div>
+            </div>
+            <form class="row g-3 align-items-end mb-3" method="GET" action="{{ url_for('dashboard_admin') }}">
+              <div class="col-12 col-md-5">
+                <label class="form-label">Codigo factura o usuario</label>
+                <input class="form-control" type="text" name="buscar_factura" value="{{ admin_invoice_search }}" placeholder="Ej. 15 o RS-0001" required>
+              </div>
+              <div class="col-12 col-md-3">
+                <button type="submit" class="btn btn-primary">Buscar factura</button>
+              </div>
+            </form>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead><tr><th>Usuario</th><th>Codigo</th><th>Fecha</th><th>Valor</th><th>Estado</th><th>Meses</th><th class="text-end">Acciones</th></tr></thead>
+                <tbody>
+                  {% for factura in admin_invoices %}
+                    <tr>
+                      <td><strong>{{ factura.nombre_completo }}</strong><small class="text-muted">{{ factura.direccion }}</small></td>
+                      <td><strong>#{{ factura.id_factura }}</strong><small>{{ factura.codigo_recibo }}</small></td>
+                      <td>{{ factura.fecha_emision }}</td>
+                      <td>{{ factura.valor_total|money }}</td>
+                      <td><span class="badge {{ 'text-bg-success' if factura.estado == 'pagada' else 'text-bg-danger' if factura.estado == 'vencida' else 'text-bg-warning' }}">{{ factura.estado }}</span></td>
+                      <td>{{ factura.meses_consumo }}</td>
+                      <td class="table-actions">
+                        <a class="btn btn-light btn-sm" href="{{ url_for('descargar_factura_pdf', invoice_id=factura.id_factura) }}">PDF</a>
+                        {% if factura.estado != 'pagada' %}
+                          <form method="POST" action="{{ url_for('admin_marcar_factura_pagada', invoice_id=factura.id_factura) }}">
+                            <input type="hidden" name="buscar_factura" value="{{ admin_invoice_search }}">
+                            <button class="btn btn-outline-success btn-sm" type="submit">Marcar pagada</button>
+                          </form>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="7" class="empty-row">Busca una factura por codigo de factura o codigo del usuario.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel mt-3 report-anchor" id="pagos">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-check2-square"></i><span>Reportes de pago</span></h2>
+                <p class="text-muted mb-0">Verificacion de pagos enviados por los usuarios.</p>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead><tr><th>Cliente</th><th>Meses</th><th>Valor</th><th>Metodo</th><th>Comprobante</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+                <tbody>
+                  {% for reporte in billing.reportes %}
+                    <tr>
+                      <td><strong>{{ reporte.nombre_completo }}</strong><small class="text-muted">{{ reporte.codigo_recibo }} - {{ reporte.fecha_reporte }}</small></td>
+                      <td>{{ reporte.meses_pagados }}</td>
+                      <td>{{ reporte.valor_reportado|money }}</td>
+                      <td>{{ reporte.metodo_pago }}</td>
+                      <td>{% if reporte.comprobante %}<a href="{{ url_for('comprobante_image', report_id=reporte.id_reporte) }}" target="_blank" class="btn btn-sm btn-outline-info">Ver</a>{% else %}<span class="text-muted">—</span>{% endif %}</td>
+                      <td><span class="badge {{ 'text-bg-success' if reporte.estado == 'verificado' else 'text-bg-warning' if reporte.estado == 'pendiente' else 'text-bg-danger' }}">{{ reporte.estado }}</span></td>
+                      <td class="table-actions">
+                        {% if reporte.estado == 'pendiente' %}
+                          <form method="POST" action="{{ url_for('admin_verificar_pago', report_id=reporte.id_reporte) }}"><button class="btn btn-sm btn-success" type="submit">Verificar</button></form>
+                          <form method="POST" action="{{ url_for('admin_rechazar_pago', report_id=reporte.id_reporte) }}"><input type="hidden" name="observacion" value="Pago no aprobado"><button class="btn btn-sm btn-outline-danger" type="submit">Rechazar</button></form>
+                        {% else %}
+                          <span class="text-muted small">Revisado</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="7" class="empty-row">No hay reportes de pago.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="row g-3 mt-1 report-anchor" id="sistema">
+            <div class="col-12 col-xl-5">
+              <div class="panel h-100">
+                <div class="panel-header"><div><h2 class="h5 mb-1 section-title"><i class="bi bi-person-plus"></i><span>{{ 'Editar usuario sistema' if edit_system_user else 'Nuevo usuario sistema' }}</span></h2><p class="text-muted mb-0">Accesos web para administradores y usuarios.</p></div></div>
+                <form class="form-grid" method="POST" action="{{ url_for('admin_editar_usuario_sistema', user_id=edit_system_user.id) if edit_system_user else url_for('admin_crear_usuario_sistema') }}">
+                  <label>Nombres<input class="form-control" type="text" name="nombres" value="{{ edit_system_user.nombres if edit_system_user else '' }}" required></label>
+                  <label>Apellidos<input class="form-control" type="text" name="apellidos" value="{{ edit_system_user.apellidos if edit_system_user else '' }}"></label>
+                  <label>Telefono<input class="form-control" type="tel" name="telefono" value="{{ edit_system_user.telefono if edit_system_user else '' }}" placeholder="Opcional"></label>
+                  <label>Email<input class="form-control" type="email" name="email" value="{{ edit_system_user.email if edit_system_user else '' }}" required></label>
+                  <label>Rol<select class="form-select" name="rol" required><option value="usuario" {{ 'selected' if edit_system_user and edit_system_user.rol == 'usuario' else '' }}>Usuario</option><option value="admin" {{ 'selected' if edit_system_user and edit_system_user.rol == 'admin' else '' }}>Admin</option></select></label>
+                  <label>Codigo vinculado<input class="form-control" type="text" name="codigo_recibo_vinculado" value="{{ edit_system_user.codigo_recibo_vinculado if edit_system_user and edit_system_user.codigo_recibo_vinculado else '' }}" placeholder="Opcional"></label>
+                  <label class="full">{{ 'Nueva contrasena' if edit_system_user else 'Contrasena inicial' }}<input class="form-control" type="password" name="password" placeholder="{{ 'Dejar vacia para conservar' if edit_system_user else 'Opcional, por defecto segura' }}"></label>
+                  <div class="full d-flex gap-2"><button type="submit" class="btn btn-primary">{{ 'Guardar cambios' if edit_system_user else 'Crear usuario sistema' }}</button>{% if edit_system_user %}<a href="{{ url_for('dashboard_admin') }}#sistema" class="btn btn-light">Cancelar</a>{% endif %}</div>
+                </form>
+              </div>
+            </div>
+            <div class="col-12 col-xl-7">
+              <div class="panel h-100">
+                <div class="panel-header"><div><h2 class="h5 mb-1 section-title"><i class="bi bi-people"></i><span>Accesos web</span></h2><p class="text-muted mb-0">Usuarios del sistema.</p></div></div>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0">
+                    <thead><tr><th>Nombre</th><th>Email</th><th>Rol</th><th>Codigo</th><th class="text-end">Acciones</th></tr></thead>
+                    <tbody>
+                      {% for usuario in usuarios_sistema %}
+                        <tr>
+                          <td><strong>{{ usuario.nombres }} {{ usuario.apellidos }}</strong><small class="text-muted">{{ usuario.fecha_creacion }}</small></td>
+                          <td>{{ usuario.email }}</td>
+                          <td>{{ usuario.rol }}</td>
+                          <td>{{ usuario.codigo_recibo_vinculado or 'Sin vincular' }}</td>
+                          <td class="table-actions"><a class="btn btn-light btn-sm" href="{{ url_for('dashboard_admin', editar_sistema=usuario.id) }}#sistema">Editar</a><form method="POST" action="{{ url_for('admin_eliminar_usuario_sistema', user_id=usuario.id) }}" onsubmit="return confirm('Deseas eliminar este usuario de sistema?');"><button class="btn btn-outline-danger btn-sm" type="submit">Eliminar</button></form></td>
+                        </tr>
+                      {% else %}
+                        <tr><td colspan="5" class="empty-row">No hay usuarios de sistema.</td></tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="row g-3 mt-1 report-anchor" id="acueducto">
+            <div class="col-12 col-xl-5">
+              <div class="panel h-100">
+                <div class="panel-header"><div><h2 class="h5 mb-1 section-title"><i class="bi bi-person-vcard"></i><span>{{ 'Editar cliente' if edit_client else 'Nuevo cliente' }}</span></h2><p class="text-muted mb-0">Registro de usuarios del acueducto.</p></div></div>
+                <form class="form-grid" method="POST" action="{{ url_for('admin_editar_usuario_acueducto', user_id=edit_client.id) if edit_client else url_for('admin_crear_usuario_acueducto') }}">
+                  <label>Codigo recibo<input class="form-control" type="text" name="codigo_recibo" value="{{ edit_client.codigo_recibo if edit_client else '' }}" placeholder="RS-0001" required></label>
+                  <label>Cedula<input class="form-control" type="text" name="cedula" value="{{ edit_client.cedula if edit_client else '' }}"></label>
+                  <label>Nombres<input class="form-control" type="text" name="nombres" value="{{ edit_client.nombres if edit_client else '' }}" required></label>
+                  <label>Apellidos<input class="form-control" type="text" name="apellidos" value="{{ edit_client.apellidos if edit_client else '' }}" required></label>
+                  <label class="full">Direccion<input class="form-control" type="text" name="direccion" value="{{ edit_client.direccion if edit_client else '' }}" required></label>
+                  <label class="full">Ubicacion Maps<small class="text-muted d-block fw-normal">Pega el enlace de Google Maps (iframe src o compartir)</small><input class="form-control" type="url" name="ubicacion_maps" value="{{ edit_client.ubicacion_maps if edit_client else '' }}" placeholder="https://www.google.com/maps/embed?pb=..."></label>
+                  <label>Telefono<input class="form-control" type="text" name="telefono" value="{{ edit_client.telefono if edit_client else '' }}"></label>
+                  <label>Email servicio<input class="form-control" type="email" name="email_servicio" value="{{ edit_client.email_servicio if edit_client else '' }}"></label>
+                  <div class="full d-flex gap-2"><button type="submit" class="btn btn-primary">{{ 'Guardar cliente' if edit_client else 'Crear cliente' }}</button>{% if edit_client %}<a href="{{ url_for('dashboard_admin') }}#acueducto" class="btn btn-light">Cancelar</a>{% endif %}</div>
+                </form>
+              </div>
+            </div>
+            <div class="col-12 col-xl-7">
+              <div class="panel h-100">
+                <div class="panel-header"><div><h2 class="h5 mb-1 section-title"><i class="bi bi-house-check"></i><span>Clientes del servicio</span></h2><p class="text-muted mb-0">Usuarios registrados en el acueducto.</p></div></div>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0" id="clientesTable">
+                    <thead><tr><th>Codigo</th><th>Cliente</th><th>Direccion</th><th>Contacto</th><th class="text-end">Acciones</th></tr></thead>
+                    <tbody>
+                      {% for cliente in usuarios_acueducto %}
+                        <tr>
+                          <td>{{ cliente.codigo_recibo }}</td>
+                          <td><strong>{{ cliente.nombres }} {{ cliente.apellidos }}</strong><small class="text-muted">{{ cliente.cedula or 'Sin cedula' }}</small></td>
+                          <td>{{ cliente.direccion }}</td>
+                          <td><small>{{ cliente.telefono or '' }}</small><small>{{ cliente.email_servicio or '' }}</small></td>
+                          <td class="table-actions"><a class="btn btn-light btn-sm" href="{{ url_for('dashboard_admin', editar_acueducto=cliente.id) }}#acueducto">Editar</a><form method="POST" action="{{ url_for('admin_eliminar_usuario_acueducto', user_id=cliente.id) }}" onsubmit="return confirm('Deseas eliminar este cliente del acueducto?');"><button class="btn btn-outline-danger btn-sm" type="submit">Eliminar</button></form></td>
+                        </tr>
+                      {% else %}
+                        <tr><td colspan="5" class="empty-row">No hay clientes del acueducto.</td></tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel mt-3 report-anchor" id="pqrs-admin">
+            <div class="panel-header">
+              <div><h2 class="h5 mb-1 section-title"><i class="bi bi-chat-left-text"></i><span>PQRS</span></h2><p class="text-muted mb-0">Solicitudes de usuarios.</p></div>
+              <form method="GET" action="{{ url_for('dashboard_admin') }}" class="filter-form">
+                <select class="form-select form-select-sm" name="estado_pqrs" onchange="this.form.submit()">
+                  <option value="">Todos</option>
+                  <option value="pendiente" {{ 'selected' if pqrs_status == 'pendiente' else '' }}>Pendiente</option>
+                  <option value="en_proceso" {{ 'selected' if pqrs_status == 'en_proceso' else '' }}>En proceso</option>
+                  <option value="resuelto" {{ 'selected' if pqrs_status == 'resuelto' else '' }}>Resuelto</option>
+                </select>
+              </form>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead><tr><th>Usuario</th><th>Solicitud</th><th>Estado</th><th>Respuesta admin</th></tr></thead>
+                <tbody>
+                  {% for item in pqrs_items %}
+                    <tr>
+                      <td><strong>{{ item.nombre }}</strong><small class="text-muted">{{ item.codigo_recibo or 'Sin codigo' }} - {{ item.email or '' }}</small></td>
+                      <td><strong>{{ item.asunto }}</strong><small>{{ item.tipo }} - {{ item.fecha_creacion }}</small><small>{{ item.descripcion }}</small></td>
+                      <td><span class="badge {{ 'text-bg-success' if item.estado == 'resuelto' else 'text-bg-warning' }}">{{ item.estado.replace('_', ' ') }}</span></td>
+                      <td>
+                        {% if item.estado == 'resuelto' and item.respuesta %}
+                          <div class="response-readonly"><strong>Respuesta:</strong><p>{{ item.respuesta }}</p></div>
+                          <form class="admin-response-form mt-2" method="POST" action="{{ url_for('admin_responder_pqrs', pqrs_id=item.id_pqrs) }}">
+                            <input type="hidden" name="filtro_estado" value="{{ pqrs_status }}">
+                            <select class="form-select form-select-sm" name="estado"><option value="pendiente" {{ 'selected' if item.estado == 'pendiente' else '' }}>Pendiente</option><option value="en_proceso" {{ 'selected' if item.estado == 'en_proceso' else '' }}>En proceso</option><option value="resuelto" {{ 'selected' if item.estado == 'resuelto' else '' }}>Resuelto</option></select>
+                            <textarea class="form-control form-control-sm" name="respuesta" rows="3" placeholder="Nueva respuesta"></textarea>
+                            <button class="btn btn-sm btn-primary" type="submit">Guardar</button>
+                          </form>
+                        {% else %}
+                          <form class="admin-response-form" method="POST" action="{{ url_for('admin_responder_pqrs', pqrs_id=item.id_pqrs) }}">
+                            <input type="hidden" name="filtro_estado" value="{{ pqrs_status }}">
+                            <select class="form-select form-select-sm" name="estado"><option value="pendiente" {{ 'selected' if item.estado == 'pendiente' else '' }}>Pendiente</option><option value="en_proceso" {{ 'selected' if item.estado == 'en_proceso' else '' }}>En proceso</option><option value="resuelto" {{ 'selected' if item.estado == 'resuelto' else '' }}>Resuelto</option></select>
+                            <textarea class="form-control form-control-sm" name="respuesta" rows="3" placeholder="Respuesta al usuario"></textarea>
+                            <button class="btn btn-sm btn-primary" type="submit">Guardar respuesta</button>
+                          </form>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="4" class="empty-row">No hay PQRS para este filtro.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="row g-3 mt-1 report-anchor" id="puntos-pago">
+            <div class="col-12 col-xl-5">
+              <div class="panel h-100">
+                <div class="panel-header"><div><h2 class="h5 mb-1 section-title"><i class="bi bi-geo-alt"></i><span>{{ 'Editar punto' if edit_point else 'Nuevo punto' }}</span></h2><p class="text-muted mb-0">Gestion de puntos de pago.</p></div></div>
+                <form class="form-grid" method="POST" enctype="multipart/form-data" action="{{ url_for('admin_editar_punto_pago', point_id=edit_point.id_punto) if edit_point else url_for('admin_crear_punto_pago') }}">
+                  <input type="hidden" name="imagen_actual" value="{{ edit_point.imagen if edit_point and edit_point.imagen else '' }}">
+                  <label>Nombre<input class="form-control" type="text" name="nombre" value="{{ edit_point.nombre if edit_point else '' }}" required></label>
+                  <label>Telefono<input class="form-control" type="text" name="telefono" value="{{ edit_point.telefono if edit_point else '' }}"></label>
+                  <label class="full">Direccion<input class="form-control" type="text" name="direccion" value="{{ edit_point.direccion if edit_point else '' }}" required></label>
+                  <label class="full">Horario<input class="form-control" type="text" name="horario" value="{{ edit_point.horario if edit_point else '' }}" required></label>
+                  <label class="full">Enlace Google Maps<small class="text-muted d-block fw-normal">Pega el enlace de compartir o de ruta de Google Maps.</small><input class="form-control" type="url" name="mapa_url" value="{{ edit_point.mapa_url if edit_point and edit_point.mapa_url else '' }}" placeholder="https://www.google.com/maps/..."></label>
+                  <label>Latitud<input class="form-control" type="number" step="0.0000001" name="latitud" data-lat-input value="{{ edit_point.latitud if edit_point and edit_point.latitud is not none else '' }}"></label>
+                  <label>Longitud<input class="form-control" type="number" step="0.0000001" name="longitud" data-lng-input value="{{ edit_point.longitud if edit_point and edit_point.longitud is not none else '' }}"></label>
+                  <label class="full">Imagen opcional<input class="form-control" type="file" name="imagen" accept="image/*"></label>
+                  <div class="full map-panel" id="adminPointMap" data-google-key="{{ google_maps_api_key }}"></div>
+                  <div class="full d-flex gap-2"><button type="submit" class="btn btn-primary">{{ 'Guardar punto' if edit_point else 'Crear punto' }}</button>{% if edit_point %}<a href="{{ url_for('dashboard_admin') }}#puntos-pago" class="btn btn-light">Cancelar</a>{% endif %}</div>
+                </form>
+              </div>
+            </div>
+            <div class="col-12 col-xl-7">
+              <div class="panel h-100">
+                <div class="panel-header"><div><h2 class="h5 mb-1 section-title"><i class="bi bi-list-ul"></i><span>Puntos publicados</span></h2><p class="text-muted mb-0">Listado visible para usuarios.</p></div></div>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0">
+                    <thead><tr><th>Punto</th><th>Direccion</th><th>Ruta</th><th>Horario</th><th class="text-end">Acciones</th></tr></thead>
+                    <tbody>
+                      {% for punto in puntos_pago %}
+                        <tr>
+                          <td><strong>{{ punto.nombre }}</strong><small class="text-muted">{{ punto.telefono or '' }}</small></td>
+                          <td>{{ punto.direccion }}</td>
+                          <td>
+                            {% if punto.ruta_url %}
+                              <a class="btn btn-light btn-sm" target="_blank" rel="noopener" href="{{ punto.ruta_url }}">Ver ruta</a>
+                            {% else %}
+                              <small class="text-muted">Sin enlace</small>
+                            {% endif %}
+                          </td>
+                          <td>{{ punto.horario }}</td>
+                          <td class="table-actions"><a class="btn btn-light btn-sm" href="{{ url_for('dashboard_admin', editar_punto=punto.id_punto) }}#puntos-pago">Editar</a><form method="POST" action="{{ url_for('admin_eliminar_punto_pago', point_id=punto.id_punto) }}" onsubmit="return confirm('Deseas eliminar este punto de pago?');"><button class="btn btn-outline-danger btn-sm" type="submit">Eliminar</button></form></td>
+                        </tr>
+                      {% else %}
+                        <tr><td colspan="5" class="empty-row">No hay puntos de pago.</td></tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="row g-3 mt-1 report-anchor" id="noticias-admin">
+            <div class="col-12 col-xl-5">
+              <div class="panel h-100">
+                <div class="panel-header"><div><h2 class="h5 mb-1 section-title"><i class="bi bi-newspaper"></i><span>{{ 'Editar noticia' if edit_news else 'Nueva noticia' }}</span></h2><p class="text-muted mb-0">Contenido visible en el inicio.</p></div></div>
+                <form class="form-grid" method="POST" enctype="multipart/form-data" action="{{ url_for('admin_editar_noticia', news_id=edit_news.id_noticia) if edit_news else url_for('admin_crear_noticia') }}">
+                  <input type="hidden" name="imagen_actual" value="{{ edit_news.imagen if edit_news and edit_news.imagen else '' }}">
+                  <label class="full">Titulo<input class="form-control" type="text" name="titulo" value="{{ edit_news.titulo if edit_news else '' }}" required></label>
+                  <label class="full">Resumen<textarea class="form-control" name="resumen" rows="3" required>{{ edit_news.resumen if edit_news else '' }}</textarea></label>
+                  <label class="full">Contenido<textarea class="form-control" name="contenido" rows="5">{{ edit_news.contenido if edit_news else '' }}</textarea></label>
+                  <label>Publicada<select class="form-select" name="publicada"><option value="1" {{ 'selected' if not edit_news or edit_news.publicada else '' }}>Si</option><option value="0" {{ 'selected' if edit_news and not edit_news.publicada else '' }}>No</option></select></label>
+                  <label>Imagen<input class="form-control" type="file" name="imagen" accept="image/*"></label>
+                  <div class="full d-flex gap-2"><button type="submit" class="btn btn-primary">{{ 'Guardar noticia' if edit_news else 'Crear noticia' }}</button>{% if edit_news %}<a href="{{ url_for('dashboard_admin') }}#noticias-admin" class="btn btn-light">Cancelar</a>{% endif %}</div>
+                </form>
+              </div>
+            </div>
+            <div class="col-12 col-xl-7">
+              <div class="panel h-100">
+                <div class="panel-header"><div><h2 class="h5 mb-1 section-title"><i class="bi bi-card-text"></i><span>Noticias</span></h2><p class="text-muted mb-0">Publicaciones administradas.</p></div></div>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0">
+                    <thead><tr><th>Noticia</th><th>Fecha</th><th>Estado</th><th class="text-end">Acciones</th></tr></thead>
+                    <tbody>
+                      {% for noticia in noticias %}
+                        <tr>
+                          <td><strong>{{ noticia.titulo }}</strong><small class="text-muted">{{ noticia.resumen }}</small></td>
+                          <td>{{ noticia.fecha_publicacion }}</td>
+                          <td><span class="badge {{ 'text-bg-success' if noticia.publicada else 'text-bg-warning' }}">{{ 'Publicada' if noticia.publicada else 'Oculta' }}</span></td>
+                          <td class="table-actions"><a class="btn btn-light btn-sm" href="{{ url_for('dashboard_admin', editar_noticia=noticia.id_noticia) }}#noticias-admin">Editar</a><form method="POST" action="{{ url_for('admin_eliminar_noticia', news_id=noticia.id_noticia) }}" onsubmit="return confirm('Deseas eliminar esta noticia?');"><button class="btn btn-outline-danger btn-sm" type="submit">Eliminar</button></form></td>
+                        </tr>
+                      {% else %}
+                        <tr><td colspan="4" class="empty-row">No hay noticias.</td></tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel mt-3 report-anchor" id="mensajes">
+            <div class="panel-header"><div><h2 class="h5 mb-1 section-title"><i class="bi bi-envelope"></i><span>Mensajes recibidos</span></h2><p class="text-muted mb-0">Formulario Contactanos del sitio principal.</p></div></div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead><tr><th>Remitente</th><th>Asunto</th><th>Mensaje</th><th>Estado</th><th class="text-end">Accion</th></tr></thead>
+                <tbody>
+                  {% for mensaje in mensajes_contacto %}
+                    <tr>
+                      <td><strong>{{ mensaje.nombre }}</strong><small class="text-muted">{{ mensaje.correo }} - {{ mensaje.telefono or 'Sin telefono' }}</small></td>
+                      <td>{{ mensaje.asunto }}<small>{{ mensaje.fecha_creacion }}</small></td>
+                      <td>{{ mensaje.mensaje }}</td>
+                      <td><span class="badge {{ 'text-bg-success' if mensaje.leido else 'text-bg-warning' }}">{{ 'Leido' if mensaje.leido else 'Nuevo' }}</span></td>
+                      <td class="table-actions">{% if not mensaje.leido %}<form method="POST" action="{{ url_for('admin_marcar_contacto_leido', message_id=mensaje.id_mensaje) }}"><button class="btn btn-sm btn-primary" type="submit">Marcar leido</button></form>{% else %}<span class="text-muted small">Revisado</span>{% endif %}</td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="5" class="empty-row">No hay mensajes de contacto.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer class="admin-footer">
+        <div class="container-fluid px-3 px-lg-4">
+          <span>AquaRincon - Acueducto Comunitario Rincon Santo</span>
+          <span>Panel administrativo con adminHMD.</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <div id="adminHMDUserData" hidden data-name="{{ user_name }}" data-workspace="AquaRincon" data-avatar="{{ url_for('static', filename='imagenes/LOGO.png') }}"></div>
+  <script>
+    const adminHMDUserData = document.getElementById("adminHMDUserData");
+    window.adminHMDUser = adminHMDUserData ? {
+      name: adminHMDUserData.dataset.name || "",
+      workspace: adminHMDUserData.dataset.workspace || "AquaRincon",
+      avatar: adminHMDUserData.dataset.avatar || ""
+    } : {};
+
+    (function () {
+      const adminMap = document.getElementById("adminPointMap");
+      if (!adminMap) return;
+      const latInput = document.querySelector("[data-lat-input]");
+      const lngInput = document.querySelector("[data-lng-input]");
+      function fallbackMap(text) {
+        adminMap.innerHTML = '<div class="d-flex h-100 align-items-center justify-content-center p-3 text-muted text-center">' + text + '</div>';
+      }
+      const key = adminMap.dataset.googleKey;
+      if (!key) {
+        adminMap.hidden = true;
+        return;
+      }
+      window.initAquaAdminMap = function () {
+        const start = {
+          lat: parseFloat(latInput.value) || 4.03,
+          lng: parseFloat(lngInput.value) || -74.97
+        };
+        const map = new google.maps.Map(adminMap, { center: start, zoom: 15 });
+        const marker = new google.maps.Marker({ position: start, map, draggable: true });
+        marker.addListener("dragend", function () {
+          const pos = marker.getPosition();
+          latInput.value = pos.lat().toFixed(7);
+          lngInput.value = pos.lng().toFixed(7);
+        });
+        map.addListener("click", function (event) {
+          marker.setPosition(event.latLng);
+          latInput.value = event.latLng.lat().toFixed(7);
+          lngInput.value = event.latLng.lng().toFixed(7);
+        });
+      };
+      const script = document.createElement("script");
+      script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(key) + "&callback=initAquaAdminMap";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  </script>
+  <script src="{{ url_for('static', filename='adminhmd/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='adminhmd/js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dashboard-state.js') }}"></script>
+  <script>
+  (function(){
+    // ── Profile tab switching ──
+    var dd = document.getElementById('profileDropdown');
+    if (!dd) return;
+    var tabs = dd.querySelectorAll('[data-profile-tab]');
+    var contents = dd.querySelectorAll('[data-profile-content]');
+    tabs.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var tab = btn.getAttribute('data-profile-tab');
+        tabs.forEach(function(b){ b.className = 'btn btn-sm flex-fill ' + (b.getAttribute('data-profile-tab') === tab ? 'btn-primary' : 'btn-outline-secondary'); });
+        contents.forEach(function(c){ c.style.display = c.getAttribute('data-profile-content') === tab ? '' : 'none'; });
+      });
+    });
+
+    // ── Eye toggle for password fields ──
+    dd.querySelectorAll('.toggle-pw').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var input = btn.closest('.password-field').querySelector('input');
+        var isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.querySelector('.eye-icon').style.display = isPassword ? 'none' : '';
+        btn.querySelector('.eye-off-icon').style.display = isPassword ? '' : 'none';
+        btn.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+      });
+    });
+
+    // ── Live password requirements ──
+    var pwInput = dd.querySelector('#new_password');
+    if (pwInput) {
+      pwInput.addEventListener('input', function(){
+        var v = pwInput.value;
+        var checks = {
+          length: v.length >= 10,
+          upper: /[A-Z]/.test(v),
+          lower: /[a-z]/.test(v),
+          digit: /\d/.test(v),
+          symbol: /[^A-Za-z0-9]/.test(v)
+        };
+        var reqs = dd.querySelectorAll('#passwordReqs [data-req]');
+        reqs.forEach(function(el){
+          var key = el.getAttribute('data-req');
+          if (checks[key]) {
+            el.className = 'text-success';
+            el.innerHTML = '&#10003; ' + el.textContent.replace(/^.\s*/,'');
+          } else {
+            el.className = 'text-muted';
+            el.innerHTML = '&#9679; ' + el.textContent.replace(/^.\s*/,'');
+          }
+        });
+      });
+    }
+  })();
+  </script>
+</body>
+</html>

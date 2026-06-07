@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaRincon - Dashboard Usuario</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='adminhmd/css/bootstrap.min.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='adminhmd/vendors/bootstrap-icons/bootstrap-icons.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='adminhmd/css/style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='adminhmd/css/aquarincon-admin.css') }}">
+  <style>
+    .password-field input { padding-right: 2.6rem; }
+    .toggle-pw { background: none; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; color: inherit; padding: 0.3rem; }
+    .toggle-pw:hover { opacity: 0.7; }
+    .password-reqs div { font-size: 0.75rem; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <div class="admin-shell">
+    <div class="sidebar-backdrop" data-sidebar-close></div>
+
+    <aside class="admin-sidebar" id="adminSidebar" aria-label="Navegacion de usuario">
+      <div class="sidebar-header">
+        <a class="brand-mark" href="{{ url_for('dashboard_usuario') }}" aria-label="AquaRincon usuario">
+          <img class="brand-logo-img" src="{{ url_for('static', filename='imagenes/LOGO.png') }}" alt="AquaRincon">
+          <span class="brand-copy">
+            <span class="brand-title">AquaRincon</span>
+            <span class="brand-subtitle">Panel usuario</span>
+          </span>
+        </a>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a class="nav-link active" href="#resumen"><span class="nav-icon"><i class="bi bi-speedometer2"></i></span><span class="nav-text">Resumen</span></a>
+        <a class="nav-link" href="#consulta-factura"><span class="nav-icon"><i class="bi bi-search"></i></span><span class="nav-text">Consultar factura</span></a>
+        <a class="nav-link" href="#facturas"><span class="nav-icon"><i class="bi bi-receipt"></i></span><span class="nav-text">Mis facturas</span></a>
+        <a class="nav-link" href="{{ url_for('pagar') }}"><span class="nav-icon"><i class="bi bi-cash-coin"></i></span><span class="nav-text">Pagos</span></a>
+        <a class="nav-link" href="#paz-salvo"><span class="nav-icon"><i class="bi bi-file-earmark-check"></i></span><span class="nav-text">Paz y salvo</span></a>
+        <a class="nav-link" href="#puntos-pago-usuario"><span class="nav-icon"><i class="bi bi-geo-alt"></i></span><span class="nav-text">Puntos de pago</span></a>
+        <a class="nav-link" href="#pqrs"><span class="nav-icon"><i class="bi bi-chat-left-text"></i></span><span class="nav-text">PQRS</span></a>
+      </nav>
+
+      <div class="sidebar-user">
+        <img class="avatar-img avatar-md sidebar-user-avatar" src="{{ url_for('static', filename='imagenes/LOGO.png') }}" alt="{{ user_name }}">
+        <strong>{{ user_name }}</strong>
+        <small>{{ codigo_recibo_vinculado or 'Sin codigo vinculado' }}</small>
+      </div>
+
+      <div class="sidebar-footer">
+        <span class="status-dot"></span>
+        <span class="sidebar-footer-text">Cuenta activa</span>
+      </div>
+    </aside>
+
+    <div class="admin-main">
+      <nav class="navbar admin-navbar navbar-expand bg-white">
+        <div class="container-fluid px-3 px-lg-4">
+          <button class="sidebar-toggle" type="button" data-sidebar-toggle aria-controls="adminSidebar" aria-expanded="true" aria-label="Abrir menu">
+            <span></span><span></span><span></span>
+          </button>
+
+          <form class="d-none d-md-flex ms-3 flex-grow-1" role="search" method="GET" action="{{ url_for('dashboard_usuario') }}">
+            <input class="form-control search-input" type="search" name="factura_codigo" value="{{ factura_codigo or codigo_recibo_vinculado or '' }}" placeholder="Consultar factura por codigo" aria-label="Consultar factura">
+          </form>
+
+          <div class="navbar-actions ms-auto">
+            <button class="icon-button theme-toggle" type="button" data-theme-toggle aria-label="Cambiar tema" title="Cambiar tema">
+              <i class="bi bi-moon-stars" data-theme-icon></i>
+            </button>
+            <div class="dropdown">
+              <button class="icon-button" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Notificaciones">
+                {% if pending_months > 0 %}
+                  <span class="notification-dot"></span>
+                {% endif %}
+                <i class="bi bi-bell"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end notification-menu">
+                <div class="dropdown-header fw-bold text-body">Estado de cuenta</div>
+                <a class="dropdown-item" href="#facturas">
+                  <span class="notification-title">{{ pending_months }} mes(es) pendiente(s)</span>
+                  <span class="notification-time">{{ pending_total|money }} por pagar</span>
+                </a>
+                <a class="dropdown-item" href="#puntos-pago-usuario">
+                  <span class="notification-title">{{ puntos_pago|length }} puntos de pago</span>
+                  <span class="notification-time">Disponibles para consulta</span>
+                </a>
+              </div>
+            </div>
+
+            <div class="dropdown" id="profileDropdown">
+              <button class="profile-button dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img class="avatar-img avatar-sm" src="{{ url_for('static', filename='imagenes/LOGO.png') }}" alt="{{ user_name }}">
+                <span class="profile-name d-none d-sm-inline">{{ user_name }}</span>
+              </button>
+              <div class="dropdown-menu dropdown-menu-end p-3" style="min-width: 380px;">
+                <div class="d-flex gap-2 mb-3">
+                  <button class="btn btn-sm btn-primary flex-fill" data-profile-tab="perfil">Mi Perfil</button>
+                  <button class="btn btn-sm btn-outline-secondary flex-fill" data-profile-tab="config">Configuracion</button>
+                </div>
+
+                {# ── MI PERFIL ── #}
+                <div data-profile-content="perfil">
+                  <div class="mb-3">
+                    <p class="fw-bold mb-0">{{ current_user_data.nombres }} {{ current_user_data.apellidos }}</p>
+                    <p class="text-muted small mb-0">{{ current_user_data.email }}</p>
+                    <p class="text-muted small mb-0">Documento: {{ current_user_data.cedula or 'No registrado' }}</p>
+                    <p class="text-muted small mb-0">Telefono: {{ current_user_data.telefono or 'No registrado' }}</p>
+                    <p class="text-muted small mb-0">Miembro desde: {{ current_user_data.fecha_creacion.strftime('%d/%m/%Y') if current_user_data.fecha_creacion else '' }}</p>
+                  </div>
+                  <form method="POST" action="{{ url_for('actualizar_perfil') }}">
+                    <label class="form-label small fw-bold mt-1">Nombres</label>
+                    <input class="form-control form-control-sm" type="text" name="nombres" value="{{ current_user_data.nombres }}" required>
+                    <label class="form-label small fw-bold mt-1">Apellidos</label>
+                    <input class="form-control form-control-sm" type="text" name="apellidos" value="{{ current_user_data.apellidos }}">
+                    <label class="form-label small fw-bold mt-1">Documento</label>
+                    <input class="form-control form-control-sm" type="text" name="cedula" value="{{ current_user_data.cedula or '' }}">
+                    <label class="form-label small fw-bold mt-1">Telefono</label>
+                    <input class="form-control form-control-sm" type="tel" name="telefono" value="{{ current_user_data.telefono or '' }}">
+                    <button class="btn btn-primary btn-sm mt-2 w-100" type="submit">Guardar cambios</button>
+                  </form>
+                </div>
+
+                {# ── CONFIGURACION ── #}
+                <div data-profile-content="config" style="display:none">
+                  <a class="btn btn-outline-primary btn-sm w-100 mb-3" href="{{ url_for('descargar_archivo_recuperacion') }}">Descargar archivo de recuperacion</a>
+                  <hr class="my-2">
+                  <h6 class="fw-bold small mb-2">Cambiar contrasena</h6>
+                  <form method="POST" action="{{ url_for('cambiar_contrasena') }}">
+                    <label class="form-label small fw-bold mt-1">Contrasena actual</label>
+                    <div class="password-field position-relative">
+                      <input class="form-control form-control-sm pe-5" type="password" name="current_password" required>
+                      <button type="button" class="toggle-pw btn p-1 position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent" tabindex="-1" aria-label="Mostrar contrasena">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="eye-off-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <label class="form-label small fw-bold mt-1">Nueva contrasena</label>
+                    <div class="password-field position-relative">
+                      <input class="form-control form-control-sm pe-5" type="password" name="new_password" id="new_password" required>
+                      <button type="button" class="toggle-pw btn p-1 position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent" tabindex="-1" aria-label="Mostrar contrasena">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="eye-off-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <div class="password-reqs small mt-1" id="passwordReqs">
+                      <div data-req="length" class="text-muted">● Minimo 10 caracteres</div>
+                      <div data-req="upper" class="text-muted">● Una mayuscula</div>
+                      <div data-req="lower" class="text-muted">● Una minuscula</div>
+                      <div data-req="digit" class="text-muted">● Un numero</div>
+                      <div data-req="symbol" class="text-muted">● Un simbolo</div>
+                    </div>
+                    <label class="form-label small fw-bold mt-1">Confirmar nueva contrasena</label>
+                    <div class="password-field position-relative">
+                      <input class="form-control form-control-sm pe-5" type="password" name="confirm_password" required>
+                      <button type="button" class="toggle-pw btn p-1 position-absolute end-0 top-50 translate-middle-y border-0 bg-transparent" tabindex="-1" aria-label="Mostrar contrasena">
+                        <svg class="eye-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                        </svg>
+                        <svg class="eye-off-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" style="display:none">
+                          <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                      </button>
+                    </div>
+                    <button class="btn btn-primary btn-sm mt-2 w-100" type="submit">Actualizar contrasena</button>
+                  </form>
+                </div>
+
+                <hr class="my-2">
+                <div class="d-flex gap-2">
+                  <a class="btn btn-light btn-sm flex-fill" href="{{ url_for('index') }}">Volver al inicio</a>
+                  <a class="btn btn-outline-danger btn-sm" href="{{ url_for('logout') }}">Cerrar sesion</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <main class="dashboard-content">
+        <div class="container-fluid px-3 px-lg-4 py-4">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              <div class="admin-flashes mb-3">
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ 'danger' if category == 'danger' else category }} mb-0">{{ message }}</div>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
+
+          <div class="page-heading report-anchor" id="resumen">
+            <div class="page-heading-copy">
+              <span class="page-icon"><i class="bi bi-droplet-half"></i></span>
+              <div>
+                <p class="eyebrow mb-1">Cuenta de usuario</p>
+                <h1 class="h3 mb-1">Bienvenido, {{ user_name }}</h1>
+                {% if codigo_recibo_vinculado and client %}
+                  <p class="text-muted mb-0">Tu cuenta esta vinculada al codigo {{ codigo_recibo_vinculado }}. Puedes consultar, pagar y descargar documentos.</p>
+                {% else %}
+                  <p class="text-muted mb-0">Tu cuenta no tiene codigo vinculado. Ingresa el codigo del cliente para consultar o pagar.</p>
+                {% endif %}
+              </div>
+            </div>
+            <div class="heading-actions">
+              <a class="btn btn-outline-secondary btn-sm" href="#consulta-factura"><i class="bi bi-search"></i> Consultar</a>
+              <a class="btn btn-primary btn-sm" href="{{ url_for('pagar') }}"><i class="bi bi-cash-coin"></i> Pagar</a>
+            </div>
+          </div>
+
+          <section class="row g-3 mt-1" aria-label="Metricas de usuario">
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-primary">
+                <div class="metric-top"><span class="metric-label">Saldo pendiente</span><span class="metric-icon"><i class="bi bi-wallet2"></i></span></div>
+                <div class="metric-value">{{ pending_total|money }}</div>
+                <div class="metric-meta"><span>{{ pending_months }}</span><span>mes(es) por pagar</span></div>
+              </article>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card {{ 'metric-success' if pending_months == 0 else 'metric-warning' }}">
+                <div class="metric-top"><span class="metric-label">Estado</span><span class="metric-icon"><i class="bi bi-shield-check"></i></span></div>
+                <div class="metric-value">{{ 'Al dia' if pending_months == 0 else 'Debe' }}</div>
+                <div class="metric-meta"><span>{{ 'Disponible' if pending_months == 0 else 'Pendiente' }}</span><span>facturacion</span></div>
+              </article>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-success">
+                <div class="metric-top"><span class="metric-label">Facturas</span><span class="metric-icon"><i class="bi bi-receipt"></i></span></div>
+                <div class="metric-value">{{ invoices|length }}</div>
+                <div class="metric-meta"><span>historial</span><span>del servicio</span></div>
+              </article>
+            </div>
+            <div class="col-12 col-sm-6 col-xl-3">
+              <article class="metric-card metric-danger">
+                <div class="metric-top"><span class="metric-label">Tarifa fija</span><span class="metric-icon"><i class="bi bi-droplet"></i></span></div>
+                <div class="metric-value">$20.000</div>
+                <div class="metric-meta"><span>mensual</span><span>servicio</span></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="row g-3 mt-1">
+            <div class="col-12 col-xl-8">
+              <div class="panel h-100 report-anchor" id="consulta-factura">
+                <div class="panel-header">
+                  <div>
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-search"></i><span>Todo sobre mi factura</span></h2>
+                    <p class="text-muted mb-0">Ingresa tu codigo, revisa el resumen, descarga el PDF o pasa al pago.</p>
+                  </div>
+                </div>
+                <form class="row g-3 align-items-end" method="GET" action="{{ url_for('dashboard_usuario') }}">
+                  <div class="col-12 col-md-6">
+                    <label class="form-label">Codigo de usuario</label>
+                    <input class="form-control" type="text" name="factura_codigo" value="{{ factura_codigo or codigo_recibo_vinculado or '' }}" placeholder="Ej. RS-0001" required>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <button class="btn btn-primary" type="submit">Ver resumen</button>
+                  </div>
+                </form>
+
+                {% if factura_consulta and factura_consulta_client %}
+                  <div class="invoice-summary-card mt-3">
+                    <div class="invoice-summary-head">
+                      <div>
+                        <span>Factura #{{ factura_consulta.id_factura }}</span>
+                        <h3>{{ factura_consulta_client.nombre_completo }}</h3>
+                        <p>{{ factura_consulta_client.direccion }}</p>
+                      </div>
+                      <span class="badge {{ 'text-bg-success' if factura_consulta.estado == 'pagada' else 'text-bg-danger' if factura_consulta.estado == 'vencida' else 'text-bg-warning' }}">{{ factura_consulta.estado }}</span>
+                    </div>
+                    <div class="invoice-summary-grid">
+                      <article><span>Codigo</span><strong>{{ factura_consulta.codigo_recibo }}</strong></article>
+                      <article><span>Periodo</span><strong>{{ factura_consulta.periodo }}</strong></article>
+                      <article><span>Fecha</span><strong>{{ factura_consulta.fecha_emision }}</strong></article>
+                      <article><span>Vencimiento</span><strong>{{ factura_consulta.fecha_vencimiento }}</strong></article>
+                      <article><span>Valor</span><strong>{{ factura_consulta.valor_total|money }}</strong></article>
+                      <article><span>Historial</span><strong>{{ factura_consulta_invoices|length }} factura(s)</strong></article>
+                    </div>
+                    <div class="invoice-summary-actions">
+                      <a class="btn btn-light btn-sm" href="{{ url_for('descargar_factura_pdf', invoice_id=factura_consulta.id_factura) }}"><i class="bi bi-download"></i> Descargar PDF</a>
+                      <a class="btn btn-primary btn-sm" href="{{ url_for('pagar', codigo_recibo=factura_consulta.codigo_recibo) }}"><i class="bi bi-cash-coin"></i> Pagar ahora</a>
+                    </div>
+                  </div>
+                {% elif factura_codigo %}
+                  <p class="text-muted mt-3 mb-0">No hay facturas disponibles para el codigo consultado.</p>
+                {% else %}
+                  <p class="text-muted mt-3 mb-0">Selecciona esta seccion e ingresa el codigo del usuario para ver el resumen de la factura.</p>
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="col-12 col-xl-4">
+              <div class="panel h-100">
+                <div class="panel-header">
+                  <div>
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-lightning-charge"></i><span>Accesos rapidos</span></h2>
+                    <p class="text-muted mb-0">Operaciones comunes de tu cuenta.</p>
+                  </div>
+                </div>
+                <div class="activity-list compact">
+                  <a class="activity-item" href="{{ url_for('pagar') }}"><span class="activity-dot bg-primary"></span><div><p class="mb-1 fw-semibold">Pagar factura</p><p class="text-muted small mb-0">Reporta pagos digitales o fisicos.</p></div></a>
+                  <a class="activity-item" href="#paz-salvo"><span class="activity-dot bg-success"></span><div><p class="mb-1 fw-semibold">Paz y salvo</p><p class="text-muted small mb-0">Disponible cuando estes al dia.</p></div></a>
+                  <a class="activity-item" href="#pqrs"><span class="activity-dot bg-warning"></span><div><p class="mb-1 fw-semibold">Radicar PQRS</p><p class="text-muted small mb-0">Peticiones, quejas y reclamos.</p></div></a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel mt-3 report-anchor" id="facturas">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-receipt"></i><span>Mis facturas</span></h2>
+                <p class="text-muted mb-0">Historial de facturacion asociado a tu cuenta.</p>
+              </div>
+              <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('pagar') }}">Pagar factura</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead><tr><th>Periodo</th><th>Valor</th><th>Vencimiento</th><th>Estado</th><th>PDF</th></tr></thead>
+                <tbody>
+                  {% for factura in invoices %}
+                    <tr>
+                      <td>{{ factura.periodo }}</td>
+                      <td>{{ factura.valor_total|money }}</td>
+                      <td>{{ factura.fecha_vencimiento }}</td>
+                      <td><span class="badge {{ 'text-bg-success' if factura.estado == 'pagada' else 'text-bg-danger' if factura.estado == 'vencida' else 'text-bg-warning' }}">{{ factura.estado }}</span></td>
+                      <td><a class="btn btn-light btn-sm" href="{{ url_for('descargar_factura_pdf', invoice_id=factura.id_factura) }}">Descargar</a></td>
+                    </tr>
+                  {% else %}
+                    <tr><td colspan="5" class="empty-row">Todavia no tienes facturas generadas.</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel mt-3 report-anchor" id="paz-salvo">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-file-earmark-check"></i><span>Paz y salvo</span></h2>
+                <p class="text-muted mb-0">Documento descargable para usuarios sin facturas pendientes.</p>
+              </div>
+            </div>
+            <div class="invoice-summary-card">
+              <div class="invoice-summary-head">
+                <div>
+                  <span>Estado de pagos</span>
+                  <h3>{{ 'Disponible' if pending_months == 0 and codigo_recibo_vinculado else 'No disponible' }}</h3>
+                  <p>{{ 'Estas al dia con tus pagos.' if pending_months == 0 and codigo_recibo_vinculado else 'Debes estar al dia y tener un codigo vinculado para descargarlo.' }}</p>
+                </div>
+                <span class="badge {{ 'text-bg-success' if pending_months == 0 and codigo_recibo_vinculado else 'text-bg-warning' }}">{{ 'Paz y salvo' if pending_months == 0 and codigo_recibo_vinculado else 'Pendiente' }}</span>
+              </div>
+              <div class="invoice-summary-actions">
+                {% if pending_months == 0 and codigo_recibo_vinculado %}
+                  <a class="btn btn-primary btn-sm" href="{{ url_for('descargar_paz_y_salvo') }}">Descargar paz y salvo</a>
+                {% else %}
+                  <button class="btn btn-light btn-sm" type="button" disabled>No disponible con deuda</button>
+                {% endif %}
+              </div>
+            </div>
+          </section>
+
+          {% if codigo_recibo_vinculado and client and client.ubicacion_maps %}
+          <section class="panel mt-3 report-anchor" id="mi-ubicacion">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-pin-map"></i><span>Mi ubicacion</span></h2>
+                <p class="text-muted mb-0">Ubicacion registrada del cliente {{ client.codigo_recibo }}.</p>
+              </div>
+            </div>
+            <div class="map-panel" style="min-height:300px;">
+              <iframe src="{{ client.ubicacion_maps }}" width="100%" height="300" style="border:0;border-radius:var(--panel-radius,12px);" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+            </div>
+          </section>
+          {% endif %}
+
+          <section class="panel mt-3 report-anchor" id="puntos-pago-usuario">
+            <div class="panel-header">
+              <div>
+                <h2 class="h5 mb-1 section-title"><i class="bi bi-geo-alt"></i><span>Puntos de pago</span></h2>
+                <p class="text-muted mb-0">Ubicaciones y horarios publicados por administracion.</p>
+              </div>
+            </div>
+            <div class="map-panel" id="userPaymentMap" data-map-points='{{ puntos_pago|tojson }}' data-google-key="{{ google_maps_api_key }}"></div>
+            <div class="row g-3 mt-1">
+              {% for punto in puntos_pago %}
+                <div class="col-12 col-md-6 col-xl-4">
+                  <article class="mini-stat h-100">
+                    <span>{{ punto.nombre }}</span>
+                    <strong>{{ punto.direccion }}</strong>
+                    <p class="text-muted small mb-2">{{ punto.horario }}</p>
+                    {% if punto.ruta_url %}
+                      <a class="btn btn-light btn-sm" target="_blank" rel="noopener" href="{{ punto.ruta_url }}">Abrir ruta</a>
+                    {% endif %}
+                  </article>
+                </div>
+              {% else %}
+                <div class="col-12"><p class="text-muted mb-0">Aun no hay puntos de pago publicados.</p></div>
+              {% endfor %}
+            </div>
+          </section>
+
+          <section class="row g-3 mt-1 report-anchor" id="pqrs">
+            <div class="col-12 col-xl-5">
+              <div class="panel h-100">
+                <div class="panel-header">
+                  <div>
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-chat-left-text"></i><span>Crear PQRS</span></h2>
+                    <p class="text-muted mb-0">Envia peticiones, quejas, reclamos o sugerencias.</p>
+                  </div>
+                </div>
+                <form class="form-grid" method="POST" action="{{ url_for('usuario_crear_pqrs') }}">
+                  <label>Tipo<select class="form-select" name="tipo"><option value="peticion">Peticion</option><option value="queja">Queja</option><option value="reclamo">Reclamo</option><option value="sugerencia">Sugerencia</option></select></label>
+                  <label>Codigo<input class="form-control" type="text" name="codigo_recibo" value="{{ codigo_recibo_vinculado or '' }}" placeholder="RS-0001"></label>
+                  <label class="full">Asunto<input class="form-control" type="text" name="asunto" maxlength="180" required></label>
+                  <label class="full">Descripcion<textarea class="form-control" name="descripcion" rows="5" required></textarea></label>
+                  <div class="full"><button type="submit" class="btn btn-primary">Radicar PQRS</button></div>
+                </form>
+              </div>
+            </div>
+            <div class="col-12 col-xl-7">
+              <div class="panel h-100">
+                <div class="panel-header">
+                  <div>
+                    <h2 class="h5 mb-1 section-title"><i class="bi bi-list-check"></i><span>Mis PQRS</span></h2>
+                    <p class="text-muted mb-0">Seguimiento de solicitudes realizadas.</p>
+                  </div>
+                </div>
+                <div class="table-responsive">
+                  <table class="table align-middle mb-0">
+                    <thead><tr><th>Asunto</th><th>Tipo</th><th>Estado</th><th>Respuesta</th></tr></thead>
+                    <tbody>
+                      {% for item in pqrs %}
+                        <tr>
+                          <td><strong>{{ item.asunto }}</strong><small class="text-muted">{{ item.fecha_creacion }}</small></td>
+                          <td>{{ item.tipo }}</td>
+                          <td><span class="badge {{ 'text-bg-success' if item.estado == 'resuelto' else 'text-bg-warning' }}">{{ item.estado.replace('_', ' ') }}</span></td>
+                          <td>{{ item.respuesta or 'Sin respuesta aun' }}</td>
+                        </tr>
+                      {% else %}
+                        <tr><td colspan="4" class="empty-row">No has radicado PQRS.</td></tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer class="admin-footer">
+        <div class="container-fluid px-3 px-lg-4">
+          <span>AquaRincon - Acueducto Comunitario Rincon Santo</span>
+          <span>Panel de usuario.</span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <div id="adminHMDUserData" hidden data-name="{{ user_name }}" data-workspace="AquaRincon" data-avatar="{{ url_for('static', filename='imagenes/LOGO.png') }}"></div>
+  <script>
+    const adminHMDUserData = document.getElementById("adminHMDUserData");
+    window.adminHMDUser = adminHMDUserData ? {
+      name: adminHMDUserData.dataset.name || "",
+      workspace: adminHMDUserData.dataset.workspace || "AquaRincon",
+      avatar: adminHMDUserData.dataset.avatar || ""
+    } : {};
+
+    (function () {
+      const mapEl = document.getElementById("userPaymentMap");
+      if (!mapEl) return;
+      const key = mapEl.dataset.googleKey;
+      const points = JSON.parse(mapEl.dataset.mapPoints || "[]").filter((point) => point.latitud && point.longitud);
+      function fallbackMap(text) {
+        mapEl.innerHTML = '<div class="d-flex h-100 align-items-center justify-content-center p-3 text-muted text-center">' + text + '</div>';
+      }
+      if (!key) {
+        mapEl.hidden = true;
+        return;
+      }
+      window.initAquaUserMap = function () {
+        const center = points.length ? { lat: Number(points[0].latitud), lng: Number(points[0].longitud) } : { lat: 4.03, lng: -74.97 };
+        const map = new google.maps.Map(mapEl, { center, zoom: points.length > 1 ? 13 : 15 });
+        points.forEach((point) => {
+          const marker = new google.maps.Marker({
+            position: { lat: Number(point.latitud), lng: Number(point.longitud) },
+            map,
+            title: point.nombre
+          });
+          const routeUrl = point.ruta_url || ('https://www.google.com/maps/dir/?api=1&destination=' + point.latitud + ',' + point.longitud);
+          const info = new google.maps.InfoWindow({
+            content: '<strong>' + point.nombre + '</strong><br>' + point.direccion + '<br><a target="_blank" href="' + routeUrl + '">Abrir ruta</a>'
+          });
+          marker.addListener("click", function () { info.open({ anchor: marker, map }); });
+        });
+      };
+      const script = document.createElement("script");
+      script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(key) + "&callback=initAquaUserMap";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  </script>
+  <script src="{{ url_for('static', filename='adminhmd/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ url_for('static', filename='adminhmd/js/main.js') }}"></script>
+  <script src="{{ url_for('static', filename='js/dashboard-state.js') }}"></script>
+  <script>
+  (function(){
+    // ── Profile tab switching ──
+    var dd = document.getElementById('profileDropdown');
+    if (!dd) return;
+    var tabs = dd.querySelectorAll('[data-profile-tab]');
+    var contents = dd.querySelectorAll('[data-profile-content]');
+    tabs.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var tab = btn.getAttribute('data-profile-tab');
+        tabs.forEach(function(b){ b.className = 'btn btn-sm flex-fill ' + (b.getAttribute('data-profile-tab') === tab ? 'btn-primary' : 'btn-outline-secondary'); });
+        contents.forEach(function(c){ c.style.display = c.getAttribute('data-profile-content') === tab ? '' : 'none'; });
+      });
+    });
+
+    // ── Eye toggle for password fields ──
+    dd.querySelectorAll('.toggle-pw').forEach(function(btn){
+      btn.addEventListener('click', function(){
+        var input = btn.closest('.password-field').querySelector('input');
+        var isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.querySelector('.eye-icon').style.display = isPassword ? 'none' : '';
+        btn.querySelector('.eye-off-icon').style.display = isPassword ? '' : 'none';
+        btn.setAttribute('aria-label', isPassword ? 'Ocultar contraseña' : 'Mostrar contraseña');
+      });
+    });
+
+    // ── Live password requirements ──
+    var pwInput = dd.querySelector('#new_password');
+    if (pwInput) {
+      pwInput.addEventListener('input', function(){
+        var v = pwInput.value;
+        var checks = {
+          length: v.length >= 10,
+          upper: /[A-Z]/.test(v),
+          lower: /[a-z]/.test(v),
+          digit: /\d/.test(v),
+          symbol: /[^A-Za-z0-9]/.test(v)
+        };
+        var reqs = dd.querySelectorAll('#passwordReqs [data-req]');
+        reqs.forEach(function(el){
+          var key = el.getAttribute('data-req');
+          if (checks[key]) {
+            el.className = 'text-success';
+            el.innerHTML = '&#10003; ' + el.textContent.replace(/^.\s*/,'');
+          } else {
+            el.className = 'text-muted';
+            el.innerHTML = '&#9679; ' + el.textContent.replace(/^.\s*/,'');
+          }
+        });
+      });
+    }
+  })();
+  </script>
+</body>
+</html>

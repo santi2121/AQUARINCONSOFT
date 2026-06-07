@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Codigo de verificacion</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f4;font-family:Arial,Helvetica,sans-serif;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f4f4f4;">
+    <tr>
+      <td align="center" style="padding:40px 16px;">
+        <table role="presentation" width="100%" style="max-width:600px;background-color:#ffffff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,0.08);overflow:hidden;">
+          <tr>
+            <td style="background-color:#1a1a2e;padding:32px 24px;text-align:center;">
+              <h1 style="margin:0;color:#ffffff;font-size:24px;font-weight:700;letter-spacing:1px;">AquaRincón</h1>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:32px 24px;">
+              <p style="margin:0 0 8px;font-size:16px;color:#333333;">Hola, <strong>{{ username }}</strong></p>
+              <p style="margin:0 0 24px;font-size:15px;color:#555555;line-height:1.5;">
+                Recibiste este correo porque solicitaste un codigo de verificacion para acceder a tu cuenta.
+              </p>
+              <div style="text-align:center;margin:28px 0;">
+                <div style="display:inline-block;background-color:#f0f4f8;padding:16px 32px;border-radius:10px;letter-spacing:8px;font-family:'Courier New',Courier,monospace;font-size:34px;font-weight:700;color:#1a1a2e;">
+                  {{ code }}
+                </div>
+              </div>
+              <p style="margin:0 0 24px;font-size:14px;color:#888888;text-align:center;">
+                Este codigo expira en 5 minutos.
+              </p>
+              <hr style="border:none;border-top:1px solid #e0e0e0;margin:24px 0;">
+              <p style="margin:0;font-size:12px;color:#999999;line-height:1.5;">
+                Si no solicitaste este codigo, ignora este mensaje. Nadie de nuestro equipo te pedira este codigo.
+              </p>
+              <p style="margin:16px 0 0;font-size:12px;color:#999999;">
+                &copy; 2026 AquaRincón. Todos los derechos reservados.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

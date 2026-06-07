@@ -1,0 +1,346 @@
+.brand-logo-img {
+  width: 42px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.sidebar-user .avatar-img,
+.profile-button .avatar-img {
+  object-fit: contain;
+  background: #ffffff;
+}
+
+.dashboard-content {
+  scroll-behavior: smooth;
+}
+
+.report-anchor {
+  scroll-margin-top: 92px;
+}
+
+.metric-value {
+  word-break: break-word;
+}
+
+.metric-meta {
+  min-height: 24px;
+}
+
+.chart-column span {
+  height: var(--bar-height, 12%);
+}
+
+.activity-list.compact {
+  gap: 0.85rem;
+}
+
+.activity-list a {
+  color: inherit;
+}
+
+.activity-item {
+  align-items: flex-start;
+}
+
+.table td strong,
+.table td small {
+  display: block;
+}
+
+.table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.table-actions form {
+  display: inline-flex;
+  margin: 0;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.form-grid .full {
+  grid-column: 1 / -1;
+}
+
+.form-grid label,
+.filter-form label {
+  color: var(--admin-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea,
+.filter-form input,
+.filter-form select {
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
+.admin-response-form {
+  display: grid;
+  gap: 0.55rem;
+  min-width: 240px;
+}
+
+.map-panel {
+  min-height: 240px;
+  border: 1px dashed var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-surface-soft);
+  overflow: hidden;
+}
+
+.empty-row {
+  color: var(--admin-muted) !important;
+  text-align: center;
+}
+
+.admin-flashes {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.mini-stat {
+  padding: 0.9rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-surface-soft);
+}
+
+.mini-stat span {
+  display: block;
+  color: var(--admin-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.mini-stat strong {
+  color: var(--admin-text);
+  font-size: 1.25rem;
+}
+
+.invoice-summary-card {
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-surface);
+  overflow: hidden;
+}
+
+.invoice-summary-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.2rem;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.invoice-summary-head span:first-child,
+.invoice-summary-grid span {
+  display: block;
+  color: var(--admin-muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.invoice-summary-head h3 {
+  margin: 0.35rem 0;
+  color: var(--admin-text);
+}
+
+.invoice-summary-head p {
+  margin: 0;
+  color: var(--admin-muted);
+}
+
+.invoice-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--admin-border);
+}
+
+.invoice-summary-grid article {
+  padding: 1rem;
+  background: var(--admin-surface);
+}
+
+.invoice-summary-grid strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--admin-text);
+}
+
+.invoice-summary-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 1.2rem;
+}
+
+.payment-shell {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8fbff 0%, var(--admin-bg) 42%, #eef4fa 100%);
+}
+
+.payment-main {
+  width: min(1100px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0;
+}
+
+.payment-topbar {
+  min-height: 72px;
+  border-bottom: 1px solid var(--admin-border);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(14px);
+  box-shadow: var(--admin-shadow-sm);
+}
+
+.payment-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--admin-text);
+  font-weight: 800;
+}
+
+.payment-brand img {
+  width: 46px;
+  height: 46px;
+  object-fit: contain;
+}
+
+.payment-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.report-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.audit-kpis {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.audit-filter-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.4fr) minmax(160px, 1fr) repeat(2, minmax(130px, 0.7fr)) auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.audit-filter-grid label {
+  color: var(--admin-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.audit-filter-grid select,
+.audit-filter-grid input {
+  margin-top: 0.35rem;
+}
+
+.audit-filter-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.audit-event-summary {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.audit-event-summary div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-surface-soft);
+}
+
+.audit-event-summary span {
+  color: var(--admin-muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.audit-event-summary strong {
+  color: var(--admin-text);
+}
+
+.audit-route {
+  display: inline-block;
+  max-width: 240px;
+  white-space: normal;
+  word-break: break-word;
+  color: var(--admin-text);
+}
+
+.status-soft {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  border-radius: 8px;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.status-soft.paid {
+  background: rgba(25, 135, 84, 0.12);
+  color: #198754;
+}
+
+.status-soft.debt {
+  background: rgba(255, 193, 7, 0.16);
+  color: #b58100;
+}
+
+.status-soft.rejected {
+  background: rgba(220, 53, 69, 0.12);
+  color: #dc3545;
+}
+
+@media (max-width: 767.98px) {
+  .form-grid,
+  .report-summary-grid,
+  .audit-filter-grid,
+  .invoice-summary-grid,
+  .payment-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .table-actions {
+    justify-content: flex-start;
+  }
+
+  .audit-filter-actions,
+  .audit-kpis {
+    justify-content: flex-start;
+  }
+}

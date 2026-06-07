@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AquaRincon - Consulta de facturas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('index') }}">
+      <img src="{{ url_for('static', filename='imagenes/LOGO.png') }}" alt="AquaRincon">
+      <span>AquaRincon</span>
+    </a>
+    <nav class="top-actions">
+      <a href="{{ url_for('login') }}" class="logout">Iniciar sesion</a>
+    </nav>
+  </header>
+
+  <main class="payment-layout">
+    <section class="panel-card payment-card">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="messages">
+            {% for category, message in messages %}
+              <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <div class="panel-heading">
+        <div>
+          <span>Consulta publica</span>
+          <h1>Facturas por codigo</h1>
+        </div>
+      </div>
+      <form class="inline-admin-form" method="GET" action="{{ url_for('consultar_facturas_publicas') }}">
+        <label>Codigo de usuario
+          <input type="text" name="codigo_recibo" value="{{ codigo }}" placeholder="Ej. RS-0001" required>
+        </label>
+        <button class="btn-primary-form" type="submit">Consultar</button>
+      </form>
+
+      {% if client %}
+        <div class="payment-summary">
+          <article><span>Usuario</span><strong>{{ client.nombre_completo }}</strong><small>{{ client.direccion }}</small></article>
+          <article><span>Codigo</span><strong>{{ client.codigo_recibo }}</strong><small>{{ client.estado }}</small></article>
+          <article><span>Facturas</span><strong>{{ invoices|length }}</strong><small>Historial encontrado</small></article>
+        </div>
+        {% if client.ubicacion_maps %}
+        <div style="margin-top:1rem;">
+          <iframe src="{{ client.ubicacion_maps }}" width="100%" height="250" style="border:0;border-radius:12px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+        {% endif %}
+      {% endif %}
+
+      <div class="users-table-wrap compact-table">
+        <table class="users-table">
+          <thead>
+            <tr><th>Codigo factura</th><th>Periodo</th><th>Fecha</th><th>Valor</th><th>Estado</th><th>PDF</th></tr>
+          </thead>
+          <tbody>
+            {% for factura in invoices %}
+              <tr>
+                <td>{{ factura.id_factura }}</td>
+                <td>{{ factura.periodo }}</td>
+                <td>{{ factura.fecha_emision }}</td>
+                <td>{{ factura.valor_total|money }}</td>
+                <td><span class="status-pill {{ 'paid' if factura.estado == 'pagada' else 'rejected' if factura.estado == 'vencida' else 'debt' }}">{{ factura.estado }}</span></td>
+                <td><a class="table-link" href="{{ url_for('descargar_factura_pdf_publico', invoice_id=factura.id_factura, codigo_recibo=codigo) }}">Descargar</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="empty-row">Ingresa tu codigo para ver el historial de facturas.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
