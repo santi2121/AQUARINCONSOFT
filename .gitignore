@@ -6,4 +6,6 @@ dist/
 build/
 .venv/
 venv/
+logs/
+*.log
 db_export_*.sql
